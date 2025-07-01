@@ -61,9 +61,9 @@ export default function Pagination({ currentPage, totalItems, itemsPerPage, onPa
   const endEntry = Math.min((currentPage + 1) * itemsPerPage, totalItems);
 
   return (
-    <div className="flex items-center justify-between mt-4 px-4">
+    <div className="flex flex-wrap items-center justify-between mt-4 px-4">
       {/* Left side: entry info */}
-      <div className="flex items-center gap-4 text-sm text-gray-600">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 text-sm text-gray-600">
         <div>
           Showing {startEntry} to {endEntry} of {totalItems} entries
         </div>
@@ -89,7 +89,7 @@ export default function Pagination({ currentPage, totalItems, itemsPerPage, onPa
       </div>
 
       {/* Right side: pagination */}
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-2 overflow-x-auto w-full sm:w-auto justify-center">
         <Button
           variant="outline"
           disabled={currentPage === 0}

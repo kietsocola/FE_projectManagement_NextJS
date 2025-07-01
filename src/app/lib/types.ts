@@ -72,3 +72,42 @@ export interface PaginatedResponse<T> {
   search: string;
   searchFor: string;
 }
+
+export interface UserDTO {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+}
+
+export interface CommentDTO {
+  id: string;
+  content: string;
+  userId: string;
+  userName: string;
+  userAvatar?: string;
+  parentId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  childComments: CommentDTO[];
+  hasMoreChildren: boolean;
+  childCount: number;
+}
+
+export interface ActivityLogDTO {
+  id: string,
+  taskId: string;
+  userId: string;
+  oldValue?: Record<string, any>;
+  newValue: Record<string, any>;
+  timestamp: string;
+  userName: string;
+}
+
+export interface SubtaskDTO {
+  id: string;
+  title: string;
+  completed: boolean;
+  createdAt: string;
+  updatedAt: string;
+}

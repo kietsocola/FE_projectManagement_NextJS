@@ -252,7 +252,7 @@ export default function TaskTable({ tasks, loading, page, limit, totalElements, 
   const columnWidths = ['12.5rem', '7rem', '7rem', '9rem', '10rem', '10rem', '8rem', '4rem'];
   return (
     <div className="space-y-4">
-      <div className="rounded-md border">
+      <div className="rounded-md border overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             {table.getHeaderGroups().map(headerGroup => (

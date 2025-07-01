@@ -2,56 +2,165 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { format } from 'date-fns';
 import apiClient from '@/app/lib/api';
-import { TaskResponseDTO } from '@/app/lib/types';
+import { TaskResponseDTO, ActivityLogDTO, SubtaskDTO } from '@/app/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import ProgressInput from './components/ProgressInput';
+import AssigneeSelect from './components/AssigneeSelect';
+import PropertyEditor from './components/PropertyEditor';
+import SubtaskList from './components/SubtaskList';
+import TaskActivity from './components/TaskActivity';
+import CommentSection from './components/CommentSection';
+import { toast } from "sonner";
+import LabelSelect from './components/LabelSelect';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon } from 'lucide-react';
-import { format } from 'date-fns';
 
-export default function EditTaskPage() {
+export default function TaskEditPage() {
   const { id } = useParams();
   const router = useRouter();
   const [task, setTask] = useState<TaskResponseDTO | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activities, setActivities] = useState<ActivityLogDTO[]>([]);
+  const [subtasks, setSubtasks] = useState<SubtaskDTO[]>([]);
+  const [showLoading, setShowLoading] = useState(true);
+  const [stages, setStages] = useState<{ id: string; name: string }[]>([]);
 
   useEffect(() => {
-    const fetchTask = async () => {
+    setShowLoading(true);
+    const timer = setTimeout(() => setShowLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, [id]);
+
+  useEffect(() => {
+    if (!loading) {
+      // Đảm bảo skeleton không biến mất trước 500ms
+      const timer = setTimeout(() => setShowLoading(false), 800);
+      return () => clearTimeout(timer);
+    }
+  }, [loading]);
+
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+
       try {
-        const response = await apiClient.get<TaskResponseDTO>(`/task/${id}`);
-        setTask(response.data);
+        // Fetch task
+        const taskResponse = await apiClient.get(`/task/${id}`);
+        setTask(taskResponse.data.data);
       } catch (err) {
-        setError('Failed to fetch task');
-        console.error(err);
-      } finally {
+        console.error("Error fetching task:", err);
+        setError("Failed to fetch task");
         setLoading(false);
+        return; // Không có task thì không cần fetch các phần còn lại
       }
+
+      try {
+        const stagesRes = await apiClient.get('/task-stage/by-project/9cdb426d-4087-4a98-afff-843050855a89');
+        setStages(stagesRes.data); // Giả sử API trả về [{id, name}, ...]
+      } catch (err) {
+        console.warn("Failed to fetch stages", err);
+      }
+
+      // Fetch activity logs (optional)
+      try {
+        const activitiesResponse = await apiClient.get<ActivityLogDTO[]>(`/task-log-activity/task/${id}`);
+        setActivities(activitiesResponse.data);
+      } catch (err) {
+        console.warn("Failed to fetch activity logs", err);
+      }
+
+      // Fetch subtasks (optional)
+      try {
+        const subtasksResponse = await apiClient.get<SubtaskDTO[]>(`/task/parent/${id}`);
+        setSubtasks(subtasksResponse.data);
+      } catch (err: any) {
+        if (err.response?.status === 404) {
+          setSubtasks([]); // Không có subtask
+        } else {
+          console.warn("Failed to fetch subtasks", err);
+        }
+      }
+
+      setLoading(false);
     };
 
-    fetchTask();
+    fetchData();
   }, [id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!task) return;
 
+    // Update task
     try {
       await apiClient.put(`/task/${id}`, task);
-      router.push('/tasks');
+      toast.success("Task updated successfully");
     } catch (err) {
-      setError('Failed to update task');
-      console.error(err);
+      toast.error("Failed to update task");
+      console.error("Update task error:", err);
     }
+
+    // Optional: navigate only if task update succeeded
+    router.push("/tasks");
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
-  if (!task) return <div>Task not found</div>;
+
+  if (loading || showLoading) return (
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex justify-between items-center mb-6 animate-pulse">
+        <div className="h-8 w-40 bg-gray-200 rounded" />
+        <div className="h-8 w-24 bg-gray-200 rounded" />
+      </div>
+      <div className="bg-white p-6 rounded-lg shadow mb-8 animate-pulse">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="md:col-span-2 h-10 bg-gray-200 rounded mb-4" />
+          <div className="h-10 bg-gray-200 rounded" />
+          <div className="h-10 bg-gray-200 rounded" />
+          <div className="md:col-span-2 h-24 bg-gray-200 rounded" />
+          <div className="h-10 bg-gray-200 rounded" />
+          <div className="h-10 bg-gray-200 rounded" />
+          <div className="h-8 w-24 bg-gray-200 rounded" />
+        </div>
+        <div className="h-10 bg-gray-200 rounded mb-6" />
+        <div className="flex justify-end">
+          <div className="h-10 w-32 bg-gray-200 rounded" />
+        </div>
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <div className="h-32 bg-gray-200 rounded" />
+          <div className="h-32 bg-gray-200 rounded" />
+        </div>
+        <div>
+          <div className="h-32 bg-gray-200 rounded" />
+        </div>
+      </div>
+    </div>
+  );
+  if (error) return (
+    <div className="flex flex-col items-center justify-center min-h-[300px] p-8">
+      <div className="text-red-500 text-lg font-semibold mb-2">Đã xảy ra lỗi</div>
+      <div className="text-gray-700">{error}</div>
+      <Button type='button' className="mt-4" variant="outline" onClick={() => window.location.reload()}>
+        Thử lại
+      </Button>
+    </div>
+  );
+  if (!task) return (
+    <div className="flex flex-col items-center justify-center min-h-[300px] p-8">
+      <div className="text-gray-500 text-lg font-semibold mb-2">Task not found</div>
+      <div className="text-gray-400">Nhiệm vụ này không tồn tại hoặc đã bị xóa.</div>
+      <Button type='button' className="mt-4" variant="outline" onClick={() => router.push('/tasks')}>
+        Quay lại danh sách
+      </Button>
+    </div>
+  );
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -62,100 +171,138 @@ export default function EditTaskPage() {
         </Button>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
-            <Input
-              value={task.title}
-              onChange={(e) => setTask({ ...task, title: e.target.value })}
-              required
+      {/* trước form */}
+      <div className="bg-white p-6 rounded-lg shadow mb-6">
+        <AssigneeSelect
+          taskId={id as string}
+        />
+      </div>
+
+      <div className="bg-white p-6 rounded-lg shadow mb-6">
+        <LabelSelect
+          taskId={id as string}
+        />
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="bg-white p-6 rounded-lg shadow">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+              <Input
+                value={task.title}
+                onChange={(e) => setTask({ ...task, title: e.target.value })}
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Progress</label>
+              <ProgressInput
+                value={task.progressPercent || 0}
+                onChange={(value) => setTask({ ...task, progressPercent: value })}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Stage</label>
+              <Select
+                value={task.taskStageId || ''}
+                onValueChange={value => setTask({ ...task, taskStageId: value })}
+                required
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Choose stage..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {stages.map(stage => (
+                    <SelectItem key={stage.id} value={stage.id}>
+                      {stage.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Assignees</label>
+              <AssigneeSelect
+                selectedUsers={task.assignedUsers}
+                onChange={(users) => setTask({ ...task, assignedUsers: users })}
+              />
+            </div> */}
+
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <Textarea
+                value={task.description}
+                onChange={(e) => setTask({ ...task, description: e.target.value })}
+                rows={4}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+              <Input
+                type="datetime-local"
+                value={task.startDate ? format(new Date(task.startDate), "yyyy-MM-dd'T'HH:mm") : ''}
+                onChange={(e) => setTask({ ...task, startDate: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Deadline</label>
+              <Input
+                type="datetime-local"
+                value={task.deadline ? format(new Date(task.deadline), "yyyy-MM-dd'T'HH:mm") : ''}
+                onChange={(e) => setTask({ ...task, deadline: e.target.value })}
+              />
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="public-toggle"
+                checked={task.isPublic || false}
+                onCheckedChange={(value) => setTask({ ...task, isPublic: value })}
+              />
+              <label htmlFor="public-toggle" className="text-sm font-medium text-gray-700">
+                {task.isPublic ? 'Public' : 'Private'}
+              </label>
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <PropertyEditor
+              priority={task.taskPriorityId}
+              onChangePriority={(priority) => setTask({ ...task, taskPriorityId: priority })}
+            />
+          </div>
+
+          {error && <div className="text-red-500 mb-4">{error}</div>}
+
+          <div className="flex justify-end">
+            <Button type="submit">Save Changes</Button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <SubtaskList
+              taskId={id as string}
+              subtasks={subtasks}
+              onSubtasksChange={setSubtasks}
+            />
+
+            <CommentSection
+              taskId={id as string}
+            // comments={comments}
+            // onCommentsChange={setComments}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-            <Select
-              value={task.taskStageId || ''}
-              onValueChange={(value) => setTask({ ...task, taskStageId: value })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todo">To Do</SelectItem>
-                <SelectItem value="in_progress">In Progress</SelectItem>
-                <SelectItem value="done">Done</SelectItem>
-              </SelectContent>
-            </Select>
+            <TaskActivity activities={activities} />
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
-            <Select
-              value={task.taskPriorityId || ''}
-              onValueChange={(value) => setTask({ ...task, taskPriorityId: value })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select priority" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="high">High</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="low">Low</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Progress</label>
-            <div className="flex items-center gap-2">
-              <Input
-                type="number"
-                min="0"
-                max="100"
-                value={task.progressPercent || 0}
-                onChange={(e) => setTask({ ...task, progressPercent: parseInt(e.target.value) })}
-                className="w-20"
-              />
-              <span>%</span>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Deadline</label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full justify-start text-left font-normal">
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {task.deadline ? format(new Date(task.deadline), 'MMM dd, yyyy') : 'Select deadline'}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={task.deadline ? new Date(task.deadline) : undefined}
-                  onSelect={(date) => setTask({ ...task, deadline: date?.toISOString() })}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-        </div>
-
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-          <Textarea
-            value={task.description}
-            onChange={(e) => setTask({ ...task, description: e.target.value })}
-            rows={4}
-          />
-        </div>
-
-        {error && <div className="text-red-500 mb-4">{error}</div>}
-
-        <div className="flex justify-end">
-          <Button type="submit">Save Changes</Button>
         </div>
       </form>
     </div>

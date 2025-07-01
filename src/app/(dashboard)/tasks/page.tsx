@@ -34,7 +34,7 @@ export default function TaskListPage() {
     }
   };
   const handlePageSizeChange = (size: number) => {
-    updateFilter({ limit: size, page: 0 });
+    updateFilter({ limit: size, page: 0, sortBy: 'created_at', sortDirection: 'DESC' });
   };
   const handleSwitchView = () => {
     setViewLoading(true);

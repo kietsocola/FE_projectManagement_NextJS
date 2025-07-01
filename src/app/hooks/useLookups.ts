@@ -13,7 +13,7 @@ export const useLookups = () => {
     const fetch = async () => {
       const [priRes, staRes, labRes] = await Promise.all([
         apiClient.get('/priority'),
-        apiClient.get('/task-stage'),
+        apiClient.get('/task-stage/by-project/9cdb426d-4087-4a98-afff-843050855a89'),
         apiClient.get('/label'),
       ]);
       setPriorities(priRes.data);

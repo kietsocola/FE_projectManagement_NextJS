@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import apiClient from '../lib/api';
 import { TaskResponseDTO, TaskFilterDTO, PaginatedResponse } from '../lib/types';
 
-export const useTasks = (initialFilter: TaskFilterDTO = { page: 0, limit: 5, isPublic: true }) => {
+export const useTasks = (initialFilter: TaskFilterDTO = { page: 0, limit: 5, isPublic: true, sortBy: 'created_at', sortDirection: 'DESC', }) => {
   const [tasks, setTasks] = useState<TaskResponseDTO[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
