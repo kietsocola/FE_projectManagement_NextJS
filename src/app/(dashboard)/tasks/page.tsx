@@ -8,6 +8,8 @@ import TaskKanban from '../../components/tasks/TaskKanban';
 import SwitchView from '../../components/ui/SwitchView';
 import TableSkeletonRow from '@/app/components/ui/TableSkeletonRow';
 import { useLookups } from '@/app/hooks/useLookups';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
 
 export default function TaskListPage() {
   const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
@@ -43,22 +45,32 @@ export default function TaskListPage() {
       setViewLoading(false);
     }, 500); // 500ms skeleton
   };
+  const router = useRouter();
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
+    <div className="container mx-auto px-2 sm:px-4 py-8">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
         <h1 className="text-2xl font-bold">Task Management</h1>
-        <SwitchView
-          viewMode={viewMode}
-          onSwitch={handleSwitchView}
-        />
+        <div className="flex gap-2 items-center">
+          <Button
+            type="button"
+            onClick={() => router.push('/tasks/create')}
+            className="whitespace-nowrap"
+          >
+            + Create Task
+          </Button>
+          <SwitchView
+            viewMode={viewMode}
+            onSwitch={handleSwitchView}
+          />
+        </div>
       </div>
 
-      <TaskFilter filter={filter} 
-                  onFilterChange={updateFilter}
-                  prioritiesMap={prioritiesMap}
-                  statusesMap={statusesMap}
-                  labelsMap={labelsMap} />
+      <TaskFilter filter={filter}
+        onFilterChange={updateFilter}
+        prioritiesMap={prioritiesMap}
+        statusesMap={statusesMap}
+        labelsMap={labelsMap} />
 
       {error && <div className="alert alert-error mb-4">{error}</div>}
 

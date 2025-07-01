@@ -36,7 +36,7 @@ export default function TaskFilter({ filter, onFilterChange, prioritiesMap, stat
 
       {/* Status */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Stage</label>
         <Select
           value={filter.taskStageId || ''}
           onValueChange={(value) =>
@@ -44,7 +44,7 @@ export default function TaskFilter({ filter, onFilterChange, prioritiesMap, stat
           }
         >
           <SelectTrigger className="w-40">
-            <SelectValue placeholder="All statuses" />
+            <SelectValue placeholder="All stages" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="empty">All</SelectItem>

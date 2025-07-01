@@ -67,8 +67,8 @@ export default function Pagination({ currentPage, totalItems, itemsPerPage, onPa
         <div>
           Showing {startEntry} to {endEntry} of {totalItems} entries
         </div>
-        <span className="mx-2 text-gray-300">|</span>
-        <div className="flex items-center gap-2">
+        <span className="hidden sm:inline mx-2 text-gray-300">|</span>
+        <div className="flex items-center gap-2 pb-4 sm:pb-0">
           <span>Show rows</span>
           <Select
             value={itemsPerPage.toString()}

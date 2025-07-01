@@ -8,6 +8,9 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Check, ChevronsUpDown, X } from 'lucide-react';
 import apiClient from '@/app/lib/api';
 import { toast } from 'sonner';
+import { useProjectId } from '@/app/context/ProjectContext';
+import { useUsers } from '@/app/context/UserContext';
+
 
 interface AssigneeSelectProps {
   taskId: string;
@@ -19,19 +22,17 @@ export default function AssigneeSelect({ taskId }: AssigneeSelectProps) {
   const [assignedUsers, setAssignedUsers] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [showLoading, setShowLoading] = useState(true);
+  const projectId = useProjectId();
+  const usersMock = useUsers();
 
   // Fetch all users and assigned users
   const fetchAll = async () => {
     setLoading(true);
     try {
-      const usersRes = await apiClient.get<UserDTO[]>('/projects/9cdb426d-4087-4a98-afff-843050855a89/users');
-      setUsers(usersRes.data.length ? usersRes.data : [
-        { id: '00000000-0000-0000-0000-000000000001', name: 'Alice', email: 'alice@example.com' },
-        { id: '00000000-0000-0000-0000-000000000002', name: 'Bob', email: 'bob@example.com' },
-        { id: '00000000-0000-0000-0000-000000000003', name: 'Charlie', email: 'charlie@example.com' },
-      ]);
+      const usersRes = await apiClient.get<UserDTO[]>(`/projects/${projectId}/users`);
+      setUsers(usersRes.data.length ? usersRes.data : usersMock);
       const assignedRes = await apiClient.get<string[]>(`/task-assign?idTask=${taskId}`);
-      setAssignedUsers(assignedRes.data.map( (u: any) => u.userId));
+      setAssignedUsers(assignedRes.data.map((u: any) => u.userId));
     } catch (err) {
       toast.error('Failed to fetch users');
     } finally {

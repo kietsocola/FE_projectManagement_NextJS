@@ -96,7 +96,7 @@ export default function TaskTable({ tasks, loading, page, limit, totalElements, 
     },
     {
       accessorKey: 'taskStageId',
-      header: 'Status',
+      header: 'Stage',
       cell: ({ row }) => {
         const statusId = row.original.taskStageId || 'todo';
         const status = statusesMap[statusId];

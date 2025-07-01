@@ -4,6 +4,8 @@ import { format } from 'date-fns';
 import { ActivityLogDTO } from '@/app/lib/types';
 import { useState, useEffect, useCallback } from 'react';
 import apiClient from '@/app/lib/api';
+import { useProjectId } from '@/app/context/ProjectContext';
+import { useUserName } from '@/app/context/UserContext';
 
 interface TaskActivityProps {
   activities: ActivityLogDTO[];
@@ -13,6 +15,7 @@ export default function TaskActivity({ activities }: TaskActivityProps) {
   const [labelMap, setLabelMap] = useState<Record<string, string>>({});
   const [priorityMap, setPriorityMap] = useState<Record<string, string>>({});
   const [stageMap, setStageMap] = useState<Record<string, string>>({});
+  const projectId = useProjectId();
 
   useEffect(() => {
     const fetchMaps = async () => {
@@ -20,7 +23,7 @@ export default function TaskActivity({ activities }: TaskActivityProps) {
         const [labelRes, priorityRes, stageRes] = await Promise.all([
           apiClient.get('/label'),
           apiClient.get('/priority'),
-          apiClient.get('/task-stage/by-project/9cdb426d-4087-4a98-afff-843050855a89'),
+          apiClient.get(`/task-stage/by-project/${projectId}`),
         ]);
         const labelObj: Record<string, string> = {};
         labelRes.data.forEach((item: any) => { labelObj[item.id] = item.name; });
@@ -43,8 +46,14 @@ export default function TaskActivity({ activities }: TaskActivityProps) {
   // Helper để hiển thị tên thay vì uuid
   const getDisplayValue = useCallback((key: string, value: string) => {
     if (key === 'task priority' && priorityMap[value]) return priorityMap[value];
-    if (key === 'label' && labelMap[value]) return labelMap[value];
+    if ((key === 'labels' || key === 'label') && labelMap[value]) return labelMap[value];
     if (key === 'task stage' && stageMap[value]) return stageMap[value];
+    if (key === 'assign') {
+      return useUserName(value) || 'empty'
+    };
+    if (key === 'assignedUsers') {
+      return useUserName(value)
+    };
     return value;
   }, [labelMap, priorityMap, stageMap]);
 
@@ -72,7 +81,11 @@ export default function TaskActivity({ activities }: TaskActivityProps) {
     for (const key of Object.keys(newValue)) {
       const oldVal = oldValue[key];
       const newVal = newValue[key];
-      if (oldVal !== newVal) {
+      if (key==='assignedUsers'){
+        changes.push(
+          `Assigned "${getDisplayValue(key, newVal[0]) ?? 'empty'}"`
+        );
+      }else if (oldVal !== newVal) {
         changes.push(
           `"${key}" changed from "${getDisplayValue(key, oldVal) ?? 'empty'}" to "${getDisplayValue(key, newVal) ?? 'empty'}"`
         );
@@ -99,7 +112,7 @@ export default function TaskActivity({ activities }: TaskActivityProps) {
                 </div>
                 <div className="flex-1 pb-4">
                   <div className="flex justify-between">
-                    <p className="font-medium">{activity.userName || activity.userId}</p>
+                    <p className="font-medium">{activity.userName || useUserName(activity.userId)}</p>
                     <p className="text-sm text-gray-500">
                       {format(new Date(activity.timestamp), 'MMM dd, HH:mm')}
                     </p>
