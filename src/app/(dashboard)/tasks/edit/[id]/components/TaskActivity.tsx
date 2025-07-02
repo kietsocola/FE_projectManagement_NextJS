@@ -131,7 +131,12 @@ export default function TaskActivity({ taskId, onReload }: TaskActivityProps) {
         changes.push(
           `Assigned "${getDisplayValue(key, newVal[0]) ?? 'empty'}"`
         );
-      } else if (oldVal !== newVal) {
+      } else if (key === 'labels') {
+        changes.push(
+          `Add label "${getDisplayValue(key, newVal[0]) ?? 'empty'}"`
+        );
+      }
+      else if (oldVal !== newVal) {
         changes.push(
           `"${key}" changed from "${getDisplayValue(key, oldVal) ?? 'empty'}" to "${getDisplayValue(key, newVal) ?? 'empty'}"`
         );
