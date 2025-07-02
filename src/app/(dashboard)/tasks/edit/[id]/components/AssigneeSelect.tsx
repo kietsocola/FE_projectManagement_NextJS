@@ -14,9 +14,10 @@ import { useUsers } from '@/app/context/UserContext';
 
 interface AssigneeSelectProps {
   taskId: string;
+  onReload?: () => void;
 }
 
-export default function AssigneeSelect({ taskId }: AssigneeSelectProps) {
+export default function AssigneeSelect({ taskId, onReload }: AssigneeSelectProps) {
   const [open, setOpen] = useState(false);
   const [users, setUsers] = useState<UserDTO[]>([]);
   const [assignedUsers, setAssignedUsers] = useState<string[]>([]);
@@ -53,6 +54,7 @@ export default function AssigneeSelect({ taskId }: AssigneeSelectProps) {
       await apiClient.post(`/task-assign?taskId=${taskId}`, [userId]);
       await fetchAll();
       toast.success('Added assignee');
+      if (onReload) onReload();
     } catch (err) {
       toast.error('Failed to add assignee');
     }
@@ -64,6 +66,7 @@ export default function AssigneeSelect({ taskId }: AssigneeSelectProps) {
       await apiClient.delete(`/task-assign?taskId=${taskId}&userId=${userId}`);
       await fetchAll();
       toast.success('Removed assignee');
+      if (onReload) onReload();
     } catch (err) {
       toast.error('Failed to remove assignee');
     }

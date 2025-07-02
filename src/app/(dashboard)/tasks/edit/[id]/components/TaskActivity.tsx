@@ -5,17 +5,63 @@ import { ActivityLogDTO } from '@/app/lib/types';
 import { useState, useEffect, useCallback } from 'react';
 import apiClient from '@/app/lib/api';
 import { useProjectId } from '@/app/context/ProjectContext';
-import { useUserName } from '@/app/context/UserContext';
+import { useUsers } from '@/app/context/UserContext';
+import { Button } from '@/components/ui/button';
 
 interface TaskActivityProps {
-  activities: ActivityLogDTO[];
+  taskId: string;
+  onReload?: () => void;
 }
 
-export default function TaskActivity({ activities }: TaskActivityProps) {
+export default function TaskActivity({ taskId, onReload }: TaskActivityProps) {
   const [labelMap, setLabelMap] = useState<Record<string, string>>({});
   const [priorityMap, setPriorityMap] = useState<Record<string, string>>({});
   const [stageMap, setStageMap] = useState<Record<string, string>>({});
   const projectId = useProjectId();
+  const [activities, setActivities] = useState<ActivityLogDTO[]>([]);
+  const [page, setPage] = useState(0);
+  const [size, setSize] = useState(5);
+  // const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [showSkeleton, setShowSkeleton] = useState(false);
+  const users = useUsers();
+
+  function getUserName(id: string) {
+    return users.find(u => u.id === id)?.name || id;
+  }
+
+  const fetchActivities = async (nextPage = 0) => {
+    setLoading(true);
+    try {
+      const res = await apiClient.get(`/task-log-activity/task/${taskId}?page=${nextPage}&size=${size}`);
+      const newActivities = res.data.content || res.data; // tuỳ API trả về
+      await new Promise(res => setTimeout(res, 600));
+      if (nextPage === 0) {
+        setActivities(newActivities);
+      } else {
+        setActivities(prev => [...prev, ...newActivities]);
+      }
+    } catch (err) {
+      if (nextPage === 0) setActivities([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    setPage(0);
+    fetchActivities(0);
+  }, [taskId]);
+
+  const handleLoadMore = () => {
+    setShowSkeleton(true);
+    setTimeout(() => {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      fetchActivities(nextPage);
+      setShowSkeleton(false);
+    }, 600);
+  };
 
   useEffect(() => {
     const fetchMaps = async () => {
@@ -49,10 +95,10 @@ export default function TaskActivity({ activities }: TaskActivityProps) {
     if ((key === 'labels' || key === 'label') && labelMap[value]) return labelMap[value];
     if (key === 'task stage' && stageMap[value]) return stageMap[value];
     if (key === 'assign') {
-      return useUserName(value) || 'empty'
+      return getUserName(value) || 'empty'
     };
     if (key === 'assignedUsers') {
-      return useUserName(value)
+      return getUserName(value)
     };
     return value;
   }, [labelMap, priorityMap, stageMap]);
@@ -81,11 +127,11 @@ export default function TaskActivity({ activities }: TaskActivityProps) {
     for (const key of Object.keys(newValue)) {
       const oldVal = oldValue[key];
       const newVal = newValue[key];
-      if (key==='assignedUsers'){
+      if (key === 'assignedUsers') {
         changes.push(
           `Assigned "${getDisplayValue(key, newVal[0]) ?? 'empty'}"`
         );
-      }else if (oldVal !== newVal) {
+      } else if (oldVal !== newVal) {
         changes.push(
           `"${key}" changed from "${getDisplayValue(key, oldVal) ?? 'empty'}" to "${getDisplayValue(key, newVal) ?? 'empty'}"`
         );
@@ -96,47 +142,123 @@ export default function TaskActivity({ activities }: TaskActivityProps) {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow">
-      <h2 className="text-lg font-semibold mb-4">Activity Log</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-semibold">Activity Log</h2>
+        {/* {onReload && (
+          <Button type="button" size="sm" variant="outline" onClick={onReload}>
+            Reload
+          </Button>
+        )} */}
+      </div>
       <div className="space-y-4">
-        {activities.length > 0 ? (
-          activities.map(activity => {
-            const { oldValue = {}, newValue = {} } = activity;
-            if (Object.keys(oldValue).length === 0 && Object.keys(newValue).length === 0) {
-              return null; // Không render activity có old và new đều null
-            }
-            return (
-              <div key={activity.id} className="flex gap-3">
+        {(loading || showSkeleton) ? (
+          Array.from({ length: size }).map((_, idx) => (
+            <div key={idx} className="flex gap-3 animate-pulse">
+              <div className="flex flex-col items-center">
+                <div className="w-2 h-2 rounded-full bg-gray-300 mt-1.5"></div>
+                <div className="w-px h-full bg-gray-200"></div>
+              </div>
+              <div className="flex-1 pb-4">
+                <div className="flex justify-between">
+                  <div className="h-4 w-24 bg-gray-200 rounded mb-2"></div>
+                  <div className="h-3 w-16 bg-gray-200 rounded"></div>
+                </div>
+                <div className="h-3 w-32 bg-gray-200 rounded mb-1"></div>
+                <div className="h-3 w-40 bg-gray-100 rounded"></div>
+              </div>
+            </div>
+          ))
+        ) : activities.length > 0 ? (
+          <>
+            {activities.map(activity => {
+              const { oldValue = {}, newValue = {} } = activity;
+              if (Object.keys(oldValue).length === 0 && Object.keys(newValue).length === 0) {
+                return null; // Không render activity có old và new đều null
+              }
+              return (
+                <div key={activity.id} className="flex gap-3">
+                  <div className="flex flex-col items-center">
+                    <div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5"></div>
+                    <div className="w-px h-full bg-gray-200"></div>
+                  </div>
+                  <div className="flex-1 pb-4">
+                    <div className="flex justify-between">
+                      <p className="font-medium">{activity.userName || getUserName(activity.userId)}</p>
+                      <p className="text-sm text-gray-500">
+                        {format(new Date(activity.timestamp), 'MMM dd, HH:mm')}
+                      </p>
+                    </div>
+                    <p className="text-sm text-gray-700">
+                      {Object.keys(activity.oldValue || {}).length === 0 &&
+                        Object.keys(activity.newValue || {}).length === 1 &&
+                        activity.newValue?.hasOwnProperty('task')
+                        ? 'Created task'
+                        : 'Updated task'}
+                    </p>
+                    <div className="text-sm text-gray-500 mt-1">
+                      {buildActionDetails(activity).split('\n').map((line, i) => (
+                        <p key={i}>{line}</p>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+            {/* Skeleton loading khi nhấn "See more" */}
+            {showSkeleton && (
+              Array.from({ length: size }).map((_, idx) => (
+                <div key={idx} className="flex gap-3 animate-pulse">
+                  <div className="flex flex-col items-center">
+                    <div className="w-2 h-2 rounded-full bg-gray-300 mt-1.5"></div>
+                    <div className="w-px h-full bg-gray-200"></div>
+                  </div>
+                  <div className="flex-1 pb-4">
+                    <div className="flex justify-between">
+                      <div className="h-4 w-24 bg-gray-200 rounded mb-2"></div>
+                      <div className="h-3 w-16 bg-gray-200 rounded"></div>
+                    </div>
+                    <div className="h-3 w-32 bg-gray-200 rounded mb-1"></div>
+                    <div className="h-3 w-40 bg-gray-100 rounded"></div>
+                  </div>
+                </div>
+              ))
+            )}
+          </>
+        ) : (
+          showSkeleton ? (
+            Array.from({ length: size }).map((_, idx) => (
+              <div key={idx} className="flex gap-3 animate-pulse">
                 <div className="flex flex-col items-center">
-                  <div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5"></div>
+                  <div className="w-2 h-2 rounded-full bg-gray-300 mt-1.5"></div>
                   <div className="w-px h-full bg-gray-200"></div>
                 </div>
                 <div className="flex-1 pb-4">
                   <div className="flex justify-between">
-                    <p className="font-medium">{activity.userName || useUserName(activity.userId)}</p>
-                    <p className="text-sm text-gray-500">
-                      {format(new Date(activity.timestamp), 'MMM dd, HH:mm')}
-                    </p>
+                    <div className="h-4 w-24 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-3 w-16 bg-gray-200 rounded"></div>
                   </div>
-                  <p className="text-sm text-gray-700">
-                    {Object.keys(activity.oldValue || {}).length === 0 &&
-                      Object.keys(activity.newValue || {}).length === 1 &&
-                      activity.newValue?.hasOwnProperty('task')
-                      ? 'Created task'
-                      : 'Updated task'}
-                  </p>
-                  <div className="text-sm text-gray-500 mt-1">
-                    {buildActionDetails(activity).split('\n').map((line, i) => (
-                      <p key={i}>{line}</p>
-                    ))}
-                  </div>
+                  <div className="h-3 w-32 bg-gray-200 rounded mb-1"></div>
+                  <div className="h-3 w-40 bg-gray-100 rounded"></div>
                 </div>
               </div>
-            );
-          })
-        ) : (
-          <p className="text-gray-500">No activity yet</p>
+            ))
+          ) : (
+            <p className="text-gray-500">No activity yet</p>
+          )
         )}
       </div>
+      {/* Nút Xem thêm */}
+      {activities.length > 0 && activities.length % size === 0 && !loading && !showSkeleton && (
+        <div className="flex justify-center mt-4">
+          <Button
+            type='button'
+            onClick={handleLoadMore}
+            disabled={loading || showSkeleton}
+          >
+            {(loading || showSkeleton) ? 'Loading...' : 'See more'}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

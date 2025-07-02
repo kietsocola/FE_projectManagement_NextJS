@@ -10,9 +10,10 @@ import { toast } from "sonner";
 
 interface LabelSelectProps {
   taskId: string;
+  onReload?: () => void;
 }
 
-export default function LabelSelect({ taskId }: LabelSelectProps) {
+export default function LabelSelect({ taskId, onReload }: LabelSelectProps) {
   const [availableLabels, setAvailableLabels] = useState<LabelResponseDTO[]>([]);
   const [selectedLabels, setSelectedLabels] = useState<LabelResponseDTO[]>([]);
   const [open, setOpen] = useState(false);
@@ -44,6 +45,7 @@ export default function LabelSelect({ taskId }: LabelSelectProps) {
       await apiClient.post(`/task-label?taskId=${taskId}`, [label.id]);
       await fetchAll();
       toast.success('Added label');
+      if (onReload) onReload();
     } catch (err) {
       toast.error('Failed to add label');
     }
@@ -54,6 +56,7 @@ export default function LabelSelect({ taskId }: LabelSelectProps) {
       await apiClient.delete(`/task-label?taskId=${taskId}&labelId=${label.id}`);
       await fetchAll();
       toast.success('Removed label');
+      if (onReload) onReload();
     } catch (err) {
       toast.error('Failed to remove label');
     }

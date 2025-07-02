@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 import apiClient from '@/app/lib/api';
-import { TaskResponseDTO, ActivityLogDTO, SubtaskDTO } from '@/app/lib/types';
+import { TaskResponseDTO } from '@/app/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -18,6 +18,9 @@ import CommentSection from './components/CommentSection';
 import { toast } from "sonner";
 import LabelSelect from './components/LabelSelect';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useProjectId } from '@/app/context/ProjectContext';
+import StageSelect from './components/StageSelect';
+
 
 export default function TaskEditPage() {
   const { id } = useParams();
@@ -25,10 +28,12 @@ export default function TaskEditPage() {
   const [task, setTask] = useState<TaskResponseDTO | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activities, setActivities] = useState<ActivityLogDTO[]>([]);
-  const [subtasks, setSubtasks] = useState<SubtaskDTO[]>([]);
   const [showLoading, setShowLoading] = useState(true);
   const [stages, setStages] = useState<{ id: string; name: string }[]>([]);
+  const projectId = useProjectId();
+  const [activityKey, setActivityKey] = useState(0);
+
+  const reloadActivity = () => setActivityKey(k => k + 1);
 
   useEffect(() => {
     setShowLoading(true);
@@ -61,30 +66,10 @@ export default function TaskEditPage() {
       }
 
       try {
-        const stagesRes = await apiClient.get('/task-stage/by-project/9cdb426d-4087-4a98-afff-843050855a89');
+        const stagesRes = await apiClient.get(`/task-stage/by-project/${projectId}`);
         setStages(stagesRes.data); // Giả sử API trả về [{id, name}, ...]
       } catch (err) {
         console.warn("Failed to fetch stages", err);
-      }
-
-      // Fetch activity logs (optional)
-      try {
-        const activitiesResponse = await apiClient.get<ActivityLogDTO[]>(`/task-log-activity/task/${id}`);
-        setActivities(activitiesResponse.data);
-      } catch (err) {
-        console.warn("Failed to fetch activity logs", err);
-      }
-
-      // Fetch subtasks (optional)
-      try {
-        const subtasksResponse = await apiClient.get<SubtaskDTO[]>(`/task/parent/${id}`);
-        setSubtasks(subtasksResponse.data);
-      } catch (err: any) {
-        if (err.response?.status === 404) {
-          setSubtasks([]); // Không có subtask
-        } else {
-          console.warn("Failed to fetch subtasks", err);
-        }
       }
 
       setLoading(false);
@@ -101,13 +86,14 @@ export default function TaskEditPage() {
     try {
       await apiClient.put(`/task/${id}`, task);
       toast.success("Task updated successfully");
+      reloadActivity();
     } catch (err) {
       toast.error("Failed to update task");
       console.error("Update task error:", err);
     }
 
     // Optional: navigate only if task update succeeded
-    router.push("/tasks");
+    // router.push("/tasks");
   };
 
 
@@ -175,12 +161,14 @@ export default function TaskEditPage() {
       <div className="bg-white p-6 rounded-lg shadow mb-6">
         <AssigneeSelect
           taskId={id as string}
+          onReload={reloadActivity}
         />
       </div>
 
       <div className="bg-white p-6 rounded-lg shadow mb-6">
         <LabelSelect
           taskId={id as string}
+          onReload={reloadActivity}
         />
       </div>
 
@@ -205,23 +193,10 @@ export default function TaskEditPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Stage</label>
-              <Select
+              <StageSelect
                 value={task.taskStageId || ''}
-                onValueChange={value => setTask({ ...task, taskStageId: value })}
-                required
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Choose stage..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {stages.map(stage => (
-                    <SelectItem key={stage.id} value={stage.id}>
-                      {stage.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                onChange={value => setTask({ ...task, taskStageId: value })}
+              />
             </div>
 
             {/* <div>
@@ -235,7 +210,7 @@ export default function TaskEditPage() {
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
               <Textarea
-                value={task.description}
+                value={task.description || ''}
                 onChange={(e) => setTask({ ...task, description: e.target.value })}
                 rows={4}
               />
@@ -289,8 +264,8 @@ export default function TaskEditPage() {
           <div className="lg:col-span-2 space-y-6">
             <SubtaskList
               taskId={id as string}
-              subtasks={subtasks}
-              onSubtasksChange={setSubtasks}
+              stageId={task.taskStageId as string}
+              isPublic={task.isPublic}
             />
 
             <CommentSection
@@ -301,7 +276,10 @@ export default function TaskEditPage() {
           </div>
 
           <div>
-            <TaskActivity activities={activities} />
+            <TaskActivity
+              key={activityKey}
+              taskId={id as string}
+              onReload={reloadActivity} />
           </div>
         </div>
       </form>

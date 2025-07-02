@@ -10,6 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { CalendarIcon, Filter } from 'lucide-react';
 import { format } from 'date-fns';
 import { TaskStageResponseDTO, LabelResponseDTO, TaskPriorityResponseDTO } from '@/app/lib/types';
+import { useState, useEffect } from 'react';
 
 interface TaskFilterProps {
   filter: TaskFilterDTO;
@@ -20,6 +21,28 @@ interface TaskFilterProps {
 }
 
 export default function TaskFilter({ filter, onFilterChange, prioritiesMap, statusesMap, labelsMap }: TaskFilterProps) {
+  const [titleInput, setTitleInput] = useState(filter.title || '');
+  // State cho popover filter
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const [pendingFilter, setPendingFilter] = useState<Partial<TaskFilterDTO>>(filter);
+
+  useEffect(() => {
+    if (popoverOpen) setPendingFilter(filter);
+  }, [popoverOpen, filter]);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      if (titleInput !== filter.title) {
+        onFilterChange({ title: titleInput });
+      }
+    }, 400); // 400ms debounce
+
+    return () => clearTimeout(handler);
+  }, [titleInput]);
+
+  useEffect(() => {
+    setTitleInput(filter.title || '');
+  }, [filter.title]);
 
   return (
     <div className="bg-white p-4 rounded-lg shadow mb-6 flex flex-wrap gap-4 items-center">
@@ -29,8 +52,8 @@ export default function TaskFilter({ filter, onFilterChange, prioritiesMap, stat
         <Input
           className="w-48"
           placeholder="Search by title"
-          value={filter.title || ''}
-          onChange={(e) => onFilterChange({ title: e.target.value })}
+          value={titleInput}
+          onChange={(e) => setTitleInput(e.target.value)}
         />
       </div>
 
@@ -72,9 +95,9 @@ export default function TaskFilter({ filter, onFilterChange, prioritiesMap, stat
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
               <Select
-                value={filter.taskPriorityId || ''}
+                value={pendingFilter.taskPriorityId || ''}
                 onValueChange={(value) =>
-                  onFilterChange({ taskPriorityId: value === 'empty' ? undefined : value })
+                  setPendingFilter(f => ({ ...f, taskPriorityId: value === 'empty' ? undefined : value }))
                 }
               >
                 <SelectTrigger>
@@ -82,7 +105,7 @@ export default function TaskFilter({ filter, onFilterChange, prioritiesMap, stat
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="empty">All</SelectItem>
-                  {Object.values(prioritiesMap).map((priority:TaskPriorityResponseDTO) => (
+                  {Object.values(prioritiesMap).map((priority: TaskPriorityResponseDTO) => (
                     <SelectItem key={priority.id} value={priority.id}>
                       {priority.name}
                     </SelectItem>
@@ -95,9 +118,9 @@ export default function TaskFilter({ filter, onFilterChange, prioritiesMap, stat
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Label</label>
               <Select
-                value={filter.labelId || ''}
+                value={pendingFilter.labelId || ''}
                 onValueChange={(value) =>
-                  onFilterChange({ labelId: value === 'empty' ? undefined : value })
+                  setPendingFilter(f => ({ ...f, labelId: value === 'empty' ? undefined : value }))
                 }
               >
                 <SelectTrigger>
@@ -105,7 +128,7 @@ export default function TaskFilter({ filter, onFilterChange, prioritiesMap, stat
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="empty">All</SelectItem>
-                  {Object.values(labelsMap || {}).map((label:LabelResponseDTO) => (
+                  {Object.values(labelsMap || {}).map((label: LabelResponseDTO) => (
                     <SelectItem key={label.id} value={label.id}>
                       {label.name}
                     </SelectItem>
@@ -121,17 +144,17 @@ export default function TaskFilter({ filter, onFilterChange, prioritiesMap, stat
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-full justify-start text-left font-normal">
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {filter.startDateFrom
-                      ? format(new Date(filter.startDateFrom), 'MMM dd, yyyy')
+                    {pendingFilter.startDateFrom
+                      ? format(new Date(pendingFilter.startDateFrom), 'MMM dd, yyyy')
                       : 'Select date'}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
                   <Calendar
                     mode="single"
-                    selected={filter.startDateFrom ? new Date(filter.startDateFrom) : undefined}
+                    selected={pendingFilter.startDateFrom ? new Date(pendingFilter.startDateFrom) : undefined}
                     onSelect={(date) =>
-                      onFilterChange({ startDateFrom: date?.toISOString() })
+                      setPendingFilter(f => ({ ...f, startDateFrom: date?.toISOString() }))
                     }
                     initialFocus
                   />
@@ -146,17 +169,17 @@ export default function TaskFilter({ filter, onFilterChange, prioritiesMap, stat
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-full justify-start text-left font-normal">
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {filter.startDateTo
-                      ? format(new Date(filter.startDateTo), 'MMM dd, yyyy')
+                    {pendingFilter.startDateTo
+                      ? format(new Date(pendingFilter.startDateTo), 'MMM dd, yyyy')
                       : 'Select date'}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
                   <Calendar
                     mode="single"
-                    selected={filter.startDateTo ? new Date(filter.startDateTo) : undefined}
+                    selected={pendingFilter.startDateTo ? new Date(pendingFilter.startDateTo) : undefined}
                     onSelect={(date) =>
-                      onFilterChange({ startDateTo: date?.toISOString() })
+                      setPendingFilter(f => ({ ...f, startDateTo: date?.toISOString() }))
                     }
                     initialFocus
                   />
@@ -171,17 +194,17 @@ export default function TaskFilter({ filter, onFilterChange, prioritiesMap, stat
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-full justify-start text-left font-normal">
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {filter.deadlineFrom
-                      ? format(new Date(filter.deadlineFrom), 'MMM dd, yyyy')
+                    {pendingFilter.deadlineFrom
+                      ? format(new Date(pendingFilter.deadlineFrom), 'MMM dd, yyyy')
                       : 'Select date'}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
                   <Calendar
                     mode="single"
-                    selected={filter.deadlineFrom ? new Date(filter.deadlineFrom) : undefined}
+                    selected={pendingFilter.deadlineFrom ? new Date(pendingFilter.deadlineFrom) : undefined}
                     onSelect={(date) =>
-                      onFilterChange({ deadlineFrom: date?.toISOString() })
+                      setPendingFilter(f => ({ ...f, deadlineFrom: date?.toISOString() }))
                     }
                     initialFocus
                   />
@@ -193,8 +216,8 @@ export default function TaskFilter({ filter, onFilterChange, prioritiesMap, stat
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Is Public</label>
               <Switch
-                checked={!!filter.isPublic}
-                onCheckedChange={(checked) => onFilterChange({ isPublic: checked })}
+                checked={!!pendingFilter.isPublic}
+                onCheckedChange={(checked) => setPendingFilter(f => ({ ...f, isPublic: checked }))}
               />
             </div>
 
@@ -202,9 +225,9 @@ export default function TaskFilter({ filter, onFilterChange, prioritiesMap, stat
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
               <Select
-                value={filter.sortBy || ''}
+                value={pendingFilter.sortBy || ''}
                 onValueChange={(value) =>
-                  onFilterChange({ sortBy: value === 'empty' ? undefined : value })
+                  setPendingFilter(f => ({ ...f, sortBy: value === 'empty' ? undefined : value }))
                 }
               >
                 <SelectTrigger>
@@ -223,11 +246,12 @@ export default function TaskFilter({ filter, onFilterChange, prioritiesMap, stat
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Sort Direction</label>
               <Select
-                value={filter.sortDirection || ''}
+                value={pendingFilter.sortDirection || ''}
                 onValueChange={(value) =>
-                  onFilterChange({
+                  setPendingFilter(f => ({
+                    ...f,
                     sortDirection: value === 'empty' ? undefined : (value as 'ASC' | 'DESC'),
-                  })
+                  }))
                 }
               >
                 <SelectTrigger>
@@ -247,7 +271,7 @@ export default function TaskFilter({ filter, onFilterChange, prioritiesMap, stat
                 variant="outline"
                 size="sm"
                 onClick={() =>
-                  onFilterChange({
+                  setPendingFilter({
                     taskPriorityId: undefined,
                     labelId: undefined,
                     startDateFrom: undefined,
@@ -262,7 +286,10 @@ export default function TaskFilter({ filter, onFilterChange, prioritiesMap, stat
               >
                 Reset
               </Button>
-              <Button size="sm" onClick={() => onFilterChange({ page: 0 })}>Apply</Button>
+              <Button size="sm" onClick={() => {
+                onFilterChange({ ...pendingFilter, page: 0 });
+                setPopoverOpen(false);
+              }}>Apply</Button>
             </div>
           </PopoverContent>
         </Popover>
