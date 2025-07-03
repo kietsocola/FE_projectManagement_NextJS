@@ -48,7 +48,7 @@ export default function TaskListPage() {
   const router = useRouter();
 
   return (
-    <div className="container mx-auto px-2 sm:px-4 py-8">
+    <div className="container mx-auto px-2 sm:px-4 py-8 pt-3">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
         <h1 className="text-2xl font-bold">Task Management</h1>
         <div className="flex gap-2 items-center">

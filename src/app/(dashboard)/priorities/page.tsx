@@ -64,7 +64,7 @@ export default function PriorityManagerPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 pt-3">
       <div className='flex justify-between items-center mb-4'>
         <h1 className="text-2xl font-bold mb-4">Priority Management</h1>
         <Button
@@ -72,7 +72,7 @@ export default function PriorityManagerPage() {
           className="mb-4"
           onClick={() => router.push('/priorities/create')}
         >
-          + Add New Label
+          + Create Priority
         </Button>
       </div>
       <div className="mb-4">

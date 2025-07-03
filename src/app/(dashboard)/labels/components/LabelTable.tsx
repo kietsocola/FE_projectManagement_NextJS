@@ -122,31 +122,31 @@ export default function LabelTable({
     }, [loading]);
 
     return (
-        <div className="bg-white rounded shadow p-4">
-            <table className="w-full text-sm table-auto">
-                <thead>
+        <div className="rounded-md border overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
                     <tr>
                         <th
-                            className="cursor-pointer px-3 py-2 text-left"
+                            className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'
                             onClick={() => onSortChange('name', direction === 'ASC' ? 'DESC' : 'ASC')}
                         >
                             Name {sortBy === 'name' ? (direction === 'ASC' ? '▲' : '▼') : ''}
                         </th>
-                        <th className="px-3 py-2 text-left">Color</th>
-                        <th className="px-3 py-2 text-left">Description</th>
-                        <th className="px-3 py-2 text-left">Created At</th>
-                        <th className="px-3 py-2 text-center w-32">Actions</th>
+                        <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Color</th>
+                        <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Description</th>
+                        <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Created At</th>
+                        <th className='px-9 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Actions</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody className='bg-white divide-y divide-gray-200'>
                     {(showSkeleton || loading) ? (
                         Array.from({ length: 5 }).map((_, idx) => (
                             <tr key={idx} className="animate-pulse">
-                                <td className="px-3 py-2"><div className="h-4 w-24 bg-gray-200 rounded" /></td>
-                                <td className="px-3 py-2"><div className="h-4 w-16 bg-gray-100 rounded" /></td>
-                                <td className="px-3 py-2"><div className="h-4 w-32 bg-gray-100 rounded" /></td>
-                                <td className="px-3 py-2"><div className="h-4 w-24 bg-gray-100 rounded" /></td>
-                                <td className="px-3 py-2"><div className="h-8 w-20 bg-gray-100 rounded" /></td>
+                                <td className="px-6 py-4"><div className="h-4 w-12 bg-gray-200 rounded" /></td>
+                                <td className="px-6 py-4"><div className="h-4 w-12 bg-gray-100 rounded" /></td>
+                                <td className="px-6 py-4"><div className="h-4 w-32 bg-gray-100 rounded" /></td>
+                                <td className="px-6 py-4"><div className="h-4 w-24 bg-gray-100 rounded" /></td>
+                                <td className="px-6 py-4"><div className="h-8 w-20 bg-gray-100 rounded" /></td>
                             </tr>
                         ))
                     ) : labels.length === 0 ? (
@@ -159,14 +159,14 @@ export default function LabelTable({
                                 key={label.id}
                                 className="border-b last:border-b-0 hover:bg-gray-50 transition-colors"
                             >
-                                <td className="px-3 py-2">{label.name}</td>
-                                <td className="px-3 py-2">
+                                <td className="px-6 py-4">{label.name}</td>
+                                <td className="px-6 py-4">
                                     <span className="inline-block w-5 h-5 rounded-full border align-middle" style={{ background: label.color }} />
                                     <span className="ml-2 text-xs align-middle">{label.color}</span>
                                 </td>
-                                <td className="px-3 py-2">{label.description}</td>
-                                <td className="px-3 py-2">{label.createdAt ? new Date(label.createdAt).toLocaleString() : ''}</td>
-                                <td className="px-3 py-2">
+                                <td className="px-6 py-4">{label.description}</td>
+                                <td className="px-6 py-4">{label.createdAt ? new Date(label.createdAt).toLocaleString() : ''}</td>
+                                <td className="px-6 py-4">
                                     <div className="flex gap-2 justify-center">
                                         <Button
                                             type="button"

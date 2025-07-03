@@ -67,7 +67,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <Header />
           <div className="flex flex-1 min-h-0 bg-gray-100">
             <Sidebar />
-            <main className="flex-1 px-8 py-8">{children}</main>
+            <main className="flex-1 px-8 py-8 pt-0">{children}</main>
           </div>
           <Footer />
         </div>

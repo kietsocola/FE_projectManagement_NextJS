@@ -41,7 +41,7 @@ export default function PriorityFilter({ filter, onFilterChange }: PriorityFilte
   };
 
   return (
-    <div className="flex gap-3 items-end">
+    <div className="flex gap-3 items-end bg-white rounded-lg shadow p-4">
       <div>
         <label className="block text-xs font-medium text-gray-700 mb-1">Name</label>
         <Input value={name} onChange={e => setName(e.target.value)} placeholder="Priority name" />

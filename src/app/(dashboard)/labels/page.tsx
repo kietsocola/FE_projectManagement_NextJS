@@ -88,7 +88,7 @@ export default function LabelManagerPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 pt-3">
       <div className='flex justify-between items-center mb-4'>
         <h1 className="text-2xl font-bold mb-4">Label Management</h1>
         <Button
@@ -96,7 +96,7 @@ export default function LabelManagerPage() {
           className="mb-4"
           onClick={() => router.push('/labels/create')}
         >
-          + Add New Label
+          + Create Label
         </Button>
       </div>
       <div className="mb-4">
