@@ -1,8 +1,3 @@
-Dưới đây là một bản README.md chuyên nghiệp, đầy đủ và tối ưu cho ứng dụng **Next.js quản lý task** của bạn. Mình đã viết sẵn theo chuẩn dự án GitHub, đồng thời bổ sung những phần quan trọng như hướng dẫn cài đặt, tính năng, công nghệ, cấu trúc, quyền người dùng...
-
----
-
-```md
 # 📝 Task Management App (Next.js)
 
 A modern and scalable **task management system** built with **Next.js**, featuring advanced task filtering, subtask hierarchy, comment threads, user roles, activity logging, and customizable priorities/labels.
@@ -23,16 +18,12 @@ A modern and scalable **task management system** built with **Next.js**, featuri
 ### 🏷️ Label & Priority Management
 - **CRUD Labels/Priorities**: Manage customizable label and priority lists.
 - **Color Picker**: Choose colors for visual distinction.
-- **Usage Analytics** *(optional)*: Track most used labels/priorities.
 
 ### 🔐 Role-Based Permissions (if included)
 - **Admin**: Full control.
 - **Project Manager**: Manage tasks and assign users.
 - **User**: View and update assigned tasks, leave comments.
 
-### 📊 Dashboard *(optional suggestion)*
-- Task statistics (e.g. total, completed, overdue)
-- Filter-based charts
 
 ---
 
@@ -43,18 +34,15 @@ A modern and scalable **task management system** built with **Next.js**, featuri
 | Next.js       | React framework with SSR and routing  |
 | TypeScript    | Type-safe development                 |
 | Tailwind CSS  | Modern utility-first CSS framework    |
-| Zustand / Redux | State management                    |
-| Axios / React Query | Data fetching                   |
-| JWT Auth      | Authentication & authorization        |
-| Socket.IO     | Real-time updates for tasks/comments  |
-| PostgreSQL / MongoDB | Backend database               |
-| Node.js API (optional) | Custom backend endpoints      |
+| Axios         | Data fetching                         |
+| PostgreSQL    | Backend database                      |
+| Spring boot   | Custom backend endpoints              |
 
 ---
 
 ## 📂 Folder Structure
 
-```
+````
 
 /task-management-ui
 ├── components/           # Reusable components (TaskCard, CommentThread, etc.)
@@ -86,23 +74,13 @@ cd task-management-ui
 npm install
 ```
 
-### 3. Configure environment variables
-
-Create a `.env.local` file:
-
-```
-NEXT_PUBLIC_API_URL=http://localhost:8080/api
-NEXT_PUBLIC_SOCKET_URL=http://localhost:8080
-JWT_SECRET=your_jwt_secret
-```
-
-### 4. Run the development server
+### 3. Run the development server
 
 ```bash
 npm run dev
 ```
 
-### 5. Build for production
+### 4. Build for production
 
 ```bash
 npm run build
@@ -133,12 +111,3 @@ This project is licensed under the [MIT License](LICENSE).
 
 **Kiet Socola**
 🔗 GitHub: [@kietsocola](https://github.com/kietsocola)
-
----
-
-```
-
----
-
-Nếu bạn có backend riêng (Spring Boot, Node.js, NestJS...), mình có thể gợi ý cách viết phần `Backend API` hoặc liên kết với Swagger, v.v. Hãy cho mình biết nếu bạn muốn bổ sung.
-```
