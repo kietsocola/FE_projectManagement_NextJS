@@ -46,7 +46,7 @@ export default function TaskForm({ onCreated }: { onCreated: (id: string) => voi
             toast.success('Task created!');
             onCreated(res.data.data.id);
         } catch (err) {
-            toast.error('Failed to create task');
+            toast.error('Failed to create task: '+ err);
         } finally {
             setLoading(false);
         }

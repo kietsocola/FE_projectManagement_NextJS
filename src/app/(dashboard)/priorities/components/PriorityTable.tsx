@@ -94,7 +94,7 @@ export default function PriorityTable({
     priorities,
     loading,
     page,
-    size,
+    // size,
     totalPages,
     onPageChange,
     onDelete,

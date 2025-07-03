@@ -35,7 +35,7 @@ export default function AssigneeSelect({ taskId, onReload }: AssigneeSelectProps
       const assignedRes = await apiClient.get<string[]>(`/task-assign?idTask=${taskId}`);
       setAssignedUsers(assignedRes.data.map((u: any) => u.userId));
     } catch (err) {
-      toast.error('Failed to fetch users');
+      toast.error('Failed to fetch users ' + err);
     } finally {
       setLoading(false);
     }
@@ -56,7 +56,7 @@ export default function AssigneeSelect({ taskId, onReload }: AssigneeSelectProps
       toast.success('Added assignee');
       if (onReload) onReload();
     } catch (err) {
-      toast.error('Failed to add assignee');
+      toast.error('Failed to add assignee '+err);
     }
   };
 
@@ -68,7 +68,7 @@ export default function AssigneeSelect({ taskId, onReload }: AssigneeSelectProps
       toast.success('Removed assignee');
       if (onReload) onReload();
     } catch (err) {
-      toast.error('Failed to remove assignee');
+      toast.error('Failed to remove assignee '+err);
     }
   };
 

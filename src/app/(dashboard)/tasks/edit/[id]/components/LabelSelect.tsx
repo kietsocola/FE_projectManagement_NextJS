@@ -30,7 +30,7 @@ export default function LabelSelect({ taskId, onReload }: LabelSelectProps) {
       const assignedRes = await apiClient.get<LabelResponseDTO[]>(`/task-label?idTask=${taskId}`);
       setSelectedLabels(assignedRes.data);
     } catch (err) {
-      toast.error('Failed to fetch labels');
+      toast.error('Failed to fetch labels '+err);
     } finally {
       setLoading(false);
     }
@@ -47,7 +47,7 @@ export default function LabelSelect({ taskId, onReload }: LabelSelectProps) {
       toast.success('Added label');
       if (onReload) onReload();
     } catch (err) {
-      toast.error('Failed to add label');
+      toast.error('Failed to add label '+err);
     }
   };
 
@@ -58,7 +58,7 @@ export default function LabelSelect({ taskId, onReload }: LabelSelectProps) {
       toast.success('Removed label');
       if (onReload) onReload();
     } catch (err) {
-      toast.error('Failed to remove label');
+      toast.error('Failed to remove label '+err);
     }
   };
 

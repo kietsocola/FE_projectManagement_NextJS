@@ -17,7 +17,7 @@ export default function CreatePriorityPage() {
     const [color, setColor] = useState(COLOR_PALETTE[0]);
     const [hex, setHex] = useState('');
     const [description, setDescription] = useState('');
-    const [sortOrder, setSortOrder] = useState<number>(1);
+    // const [sortOrder, setSortOrder] = useState<number>(1);
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {

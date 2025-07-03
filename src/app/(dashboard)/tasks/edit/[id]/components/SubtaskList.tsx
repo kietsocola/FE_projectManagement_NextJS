@@ -91,7 +91,7 @@ export default function SubtaskList({ taskId, stageId }: SubtaskListProps) {
       } else {
         setSubtasks(res.data.data || []);
       }
-    } catch (err) {
+    } catch {
       if (!append) setSubtasks([]);
     } finally {
       setLoading(false);
@@ -109,7 +109,7 @@ export default function SubtaskList({ taskId, stageId }: SubtaskListProps) {
     try {
       // Lấy stageId từ props hoặc subtask đầu tiên (nếu có)
       const parentStageId = stageId || (subtasks[0]?.taskStageId ?? '');
-      const res = await apiClient.post<TaskResponseDTO>(`/task`, {
+      await apiClient.post<TaskResponseDTO>(`/task`, {
         title: newSubtask,
         parentTaskId: taskId,
         projectId,
@@ -132,19 +132,19 @@ export default function SubtaskList({ taskId, stageId }: SubtaskListProps) {
     }
   };
 
-  const toggleSubtask = async (subtaskId: string, completed: boolean) => {
-    try {
-      await apiClient.patch(`/task/${subtaskId}`, { completed });
-      setSubtasks(subtasks =>
-        subtasks.map(subtask =>
-          subtask.id === subtaskId ? { ...subtask, completed } : subtask
-        )
-      );
-      toast.success("Updated subtask successfully!")
-    } catch (err) {
-      console.error('Failed to update subtask', err);
-    }
-  };
+  // const toggleSubtask = async (subtaskId: string, completed: boolean) => {
+  //   try {
+  //     await apiClient.patch(`/task/${subtaskId}`, { completed });
+  //     setSubtasks(subtasks =>
+  //       subtasks.map(subtask =>
+  //         subtask.id === subtaskId ? { ...subtask, completed } : subtask
+  //       )
+  //     );
+  //     toast.success("Updated subtask successfully!")
+  //   } catch (err) {
+  //     console.error('Failed to update subtask', err);
+  //   }
+  // };
 
   const deleteSubtask = async (subtaskId: string) => {
     try {

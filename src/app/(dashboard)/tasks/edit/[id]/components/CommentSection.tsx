@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { MoreVertical, Reply, Edit, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
+import { MoreVertical, Reply, ChevronDown } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -59,7 +59,7 @@ export default function CommentSection({ taskId }: CommentSectionProps) {
   const [newComment, setNewComment] = useState('');
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [editingComment, setEditingComment] = useState<string | null>(null);
-  const [editContent, setEditContent] = useState(''); const [showSuccess, setShowSuccess] = useState(false);
+  const [editContent, setEditContent] = useState('');
   const [replyPages, setReplyPages] = useState<{ [commentId: string]: number }>({});
 
   // Fetch initial comments

@@ -37,7 +37,7 @@ export default function PriorityFilter({ filter, onFilterChange }: PriorityFilte
     setColor('');
     setCreatedFrom('');
     setCreatedTo('');
-    onFilterChange({});
+    // onFilterChange({});
   };
 
   return (

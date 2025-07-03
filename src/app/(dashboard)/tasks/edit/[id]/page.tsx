@@ -17,7 +17,6 @@ import TaskActivity from './components/TaskActivity';
 import CommentSection from './components/CommentSection';
 import { toast } from "sonner";
 import LabelSelect from './components/LabelSelect';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useProjectId } from '@/app/context/ProjectContext';
 import StageSelect from './components/StageSelect';
 

@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 
 export default function TaskCreatePage() {
     const [taskId, setTaskId] = useState<string | null>(null);
-    const [created, setCreated] = useState(false);
+    // const [created, setCreated] = useState(false);
     const router = useRouter();
 
     return (
@@ -24,7 +24,7 @@ export default function TaskCreatePage() {
                 <TaskForm
                     onCreated={(id) => {
                         setTaskId(id);
-                        setCreated(true);
+                        // setCreated(true);
                     }}
                 />
             ) : (

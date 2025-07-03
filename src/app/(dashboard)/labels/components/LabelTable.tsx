@@ -2,7 +2,7 @@
 
 import { Label } from '../page';
 import { Button } from '@/components/ui/button';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState, useRef } from 'react';
 
 interface LabelTableProps {
@@ -96,7 +96,7 @@ export default function LabelTable({
     labels,
     loading,
     page,
-    size,
+    // size,
     totalPages,
     onPageChange,
     onDelete,
@@ -107,6 +107,8 @@ export default function LabelTable({
     const router = useRouter();
     const [showSkeleton, setShowSkeleton] = useState(false);
     const loadingStart = useRef<number | null>(null);
+    const searchParams = useSearchParams();
+
 
     useEffect(() => {
         let timeout: NodeJS.Timeout;
@@ -172,7 +174,10 @@ export default function LabelTable({
                                             type="button"
                                             size="sm"
                                             variant="outline"
-                                            onClick={() => router.push(`/labels/edit/${label.id}`)}
+                                            onClick={() => {
+                                                const query = searchParams.toString();
+                                                router.push(`/labels/edit/${label.id}${query ? `?${query}` : ''}`);
+                                            }}
                                         >
                                             Edit
                                         </Button>

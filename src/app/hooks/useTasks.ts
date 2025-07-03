@@ -4,11 +4,11 @@ import { useState, useEffect, useCallback } from 'react';
 import apiClient from '../lib/api';
 import { TaskResponseDTO, TaskFilterDTO, PaginatedResponse } from '../lib/types';
 
-export const useTasks = (initialFilter: TaskFilterDTO = { page: 0, limit: 5, isPublic: true, sortBy: 'created_at', sortDirection: 'DESC', }) => {
+export const useTasks = (filter: TaskFilterDTO) => {
   const [tasks, setTasks] = useState<TaskResponseDTO[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [filter, setFilter] = useState<TaskFilterDTO>(initialFilter);
+  // const [filter, setFilter] = useState<TaskFilterDTO>(initialFilter);
   const [totalElements, setTotalElements] = useState<number>(0);
   // const [total, setTotal] = useState<number>(0);
 
@@ -40,9 +40,9 @@ useEffect(() => {
 }, [fetchTasks]);
 
 // Ghi đè các giá trị trong filter, cái cũ giữ nguyên, cái mới có cái nào thì ghi đè lên
-const updateFilter = (newFilter: Partial<TaskFilterDTO>) => {
-  setFilter(prev => ({ ...prev, ...newFilter }));
-};
+// const updateFilter = (newFilter: Partial<TaskFilterDTO>) => {
+//   setFilter(prev => ({ ...prev, ...newFilter }));
+// };
 
 const deleteTask = async (id: string) => {
   try {
@@ -62,7 +62,7 @@ return {
   filter,
   totalElements,
   fetchTasks,
-  updateFilter,
+  // updateFilter,
   deleteTask,
 };
 };

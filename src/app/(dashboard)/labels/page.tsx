@@ -6,7 +6,7 @@ import LabelForm from './components/LabelForm';
 import LabelFilter from './components/LabelFilter';
 import apiClient from '@/app/lib/api';
 import { Button } from '@/components/ui/button';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 
 export interface Label {
@@ -33,23 +33,85 @@ export interface LabelPagination {
 }
 
 export default function LabelManagerPage() {
+
+
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // 1. Lấy giá trị từ URL query
+  const getParam = (key: string, defaultValue: any) => {
+    const value = searchParams.get(key);
+    if (value === null) return defaultValue;
+    if (key === 'page') return Math.max(Number(value) - 1, 0); // page trên URL bắt đầu từ 1
+    if (key === 'size') return Number(value);
+    return value;
+  };
+
   const [labels, setLabels] = useState<Label[]>([]);
-  const [filter, setFilter] = useState<LabelFilterDTO>({});
-  const [page, setPage] = useState(0);
-  const [size, setSize] = useState(10);
+  const [filter, setFilter] = useState<LabelFilterDTO>({
+    name: searchParams.get('name') || undefined,
+    color: searchParams.get('color') || undefined,
+    createdFrom: searchParams.get('createdFrom') || undefined,
+    createdTo: searchParams.get('createdTo') || undefined,
+  });
+  const [page, setPage] = useState(getParam('page', 0));
+  const [size] = useState(getParam('size', 5));
+
   const [totalPages, setTotalPages] = useState(1);
-  const [sortBy, setSortBy] = useState('id');
-  const [direction, setDirection] = useState<'ASC' | 'DESC'>('ASC');
+  const [sortBy, setSortBy] = useState(getParam('sortBy', 'id'));
+  const [direction, setDirection] = useState<'ASC' | 'DESC'>(getParam('direction', 'ASC'));
   const [loading, setLoading] = useState(false);
   const [editingLabel, setEditingLabel] = useState<Label | null>(null);
-  const router = useRouter();
+
+  const DEFAULTS: { [key: string]: string | number } = {
+    page: 1,
+    size: 5,
+    sortBy: 'id',
+    direction: 'ASC',
+  };
+
+
+  const updateUrl = (params: any) => {
+    const url = new URL(window.location.href);
+    Object.entries(params).forEach(([key, value]) => {
+      let v = value;
+      if (key === 'page') v = Number(value) + 1; // page trên URL bắt đầu từ 1
+      if (
+        v !== undefined &&
+        v !== null &&
+        v !== '' &&
+        (DEFAULTS[key] === undefined || String(v) !== String(DEFAULTS[key]))
+      ) {
+        url.searchParams.set(key, String(v));
+      } else {
+        url.searchParams.delete(key);
+      }
+    });
+    window.history.replaceState(null, '', url.pathname + url.search);
+  };
+
+  // 3. Khi các state thay đổi, cập nhật URL
+  useEffect(() => {
+    updateUrl({
+      page,
+      size,
+      sortBy,
+      direction,
+      ...filter,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, size, sortBy, direction, filter]);
+
   const fetchLabels = async () => {
     setLoading(true);
     try {
-      const res = await apiClient.post(`/label/filter?page=${page}&size=${size}&sortBy=${sortBy}&direction=${direction}`, filter);
+      const res = await apiClient.post(
+        `/label/filter?page=${page}&size=${size}&sortBy=${sortBy}&direction=${direction}`,
+        filter
+      );
       setLabels(res.data.data.data || res.data.content || []);
-      setTotalPages(res.data.totalPages || 1);
-    } catch (err) {
+      setTotalPages(res.data.data.totalPages || 1);
+    } catch {
       setLabels([]);
       setTotalPages(1);
     } finally {
@@ -89,7 +151,7 @@ export default function LabelManagerPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 pt-3">
-      <div className='flex justify-between items-center mb-4'>
+      <div className='flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-2'>
         <h1 className="text-2xl font-bold mb-4">Label Management</h1>
         <Button
           type="button"
@@ -102,7 +164,10 @@ export default function LabelManagerPage() {
       <div className="mb-4">
         <LabelFilter
           filter={filter}
-          onFilterChange={setFilter}
+          onFilterChange={(newFilter) => {
+            setFilter(newFilter);
+            setPage(0); // Reset về trang đầu khi filter thay đổi
+          }}
         />
       </div>
       <div className="mb-4">

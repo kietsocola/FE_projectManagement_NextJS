@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
-import { Switch } from '@/components/ui/switch';
+// import { Switch } from '@/components/ui/switch';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon, Filter } from 'lucide-react';
 import { format } from 'date-fns';
@@ -213,13 +213,13 @@ export default function TaskFilter({ filter, onFilterChange, prioritiesMap, stat
             </div>
 
             {/* Is Public */}
-            <div>
+            {/* <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Is Public</label>
               <Switch
                 checked={!!pendingFilter.isPublic}
                 onCheckedChange={(checked) => setPendingFilter(f => ({ ...f, isPublic: checked }))}
               />
-            </div>
+            </div> */}
 
             {/* Sort By */}
             <div>

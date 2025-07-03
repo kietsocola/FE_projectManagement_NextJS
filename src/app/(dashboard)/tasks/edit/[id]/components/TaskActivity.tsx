@@ -13,14 +13,14 @@ interface TaskActivityProps {
   onReload?: () => void;
 }
 
-export default function TaskActivity({ taskId, onReload }: TaskActivityProps) {
+export default function TaskActivity({ taskId }: TaskActivityProps) {
   const [labelMap, setLabelMap] = useState<Record<string, string>>({});
   const [priorityMap, setPriorityMap] = useState<Record<string, string>>({});
   const [stageMap, setStageMap] = useState<Record<string, string>>({});
   const projectId = useProjectId();
   const [activities, setActivities] = useState<ActivityLogDTO[]>([]);
   const [page, setPage] = useState(0);
-  const [size, setSize] = useState(5);
+  const [size] = useState(5);
   // const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [showSkeleton, setShowSkeleton] = useState(false);
@@ -41,7 +41,7 @@ export default function TaskActivity({ taskId, onReload }: TaskActivityProps) {
       } else {
         setActivities(prev => [...prev, ...newActivities]);
       }
-    } catch (err) {
+    } catch {
       if (nextPage === 0) setActivities([]);
     } finally {
       setLoading(false);
@@ -83,7 +83,7 @@ export default function TaskActivity({ taskId, onReload }: TaskActivityProps) {
         stageRes.data.forEach((item: any) => { stageObj[item.id] = item.name; });
         setStageMap(stageObj);
       } catch (err) {
-        // handle error
+        console.error(err);
       }
     };
     fetchMaps();

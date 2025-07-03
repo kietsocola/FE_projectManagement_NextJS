@@ -37,7 +37,7 @@ export default function LabelFilter({ filter, onFilterChange }: LabelFilterProps
     setColor('');
     setCreatedFrom('');
     setCreatedTo('');
-    onFilterChange({});
+    // onFilterChange({});
   };
 
   return (

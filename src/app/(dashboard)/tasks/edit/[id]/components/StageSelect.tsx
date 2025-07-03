@@ -62,7 +62,7 @@ export default function StageSelect({ value, onChange }: StageSelectProps) {
     const [editName, setEditName] = useState('');
     const [editColor, setEditColor] = useState(COLOR_PALETTE[0]);
     const [editHex, setEditHex] = useState('');
-    const [editSortOrder, setEditSortOrder] = useState<number>();
+    // const [editSortOrder, setEditSortOrder] = useState<number>();
 
     const [selectOpen, setSelectOpen] = useState(false);
     const sortedStages = [...stages].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
@@ -84,7 +84,7 @@ export default function StageSelect({ value, onChange }: StageSelectProps) {
         try {
             const res = await apiClient.get(`/task-stage/by-project/${projectId}`);
             setStages(res.data);
-        } catch (err) {
+        } catch {
             setStages([]);
         } finally {
             setLoading(false);
@@ -114,7 +114,7 @@ export default function StageSelect({ value, onChange }: StageSelectProps) {
             setShowAdd(false);
             fetchStages();
         } catch (err) {
-            toast.error("Fail when add stage!")
+            toast.error("Fail when add stage! "+err)
         }
     };
 
@@ -136,7 +136,7 @@ export default function StageSelect({ value, onChange }: StageSelectProps) {
             setEditHex('');
             fetchStages();
         } catch (err) {
-            toast.error("Fail when add stage!")
+            toast.error("Fail when add stage! "+err)
         }
     };
 

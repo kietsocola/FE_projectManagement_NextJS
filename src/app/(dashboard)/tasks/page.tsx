@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTasks } from '../../hooks/useTasks';
 import TaskFilter from '../../components/tasks/TaskFilter';
 import TaskTable from '../../components/tasks/TaskTable';
@@ -8,36 +8,93 @@ import TaskKanban from '../../components/tasks/TaskKanban';
 import SwitchView from '../../components/ui/SwitchView';
 import TableSkeletonRow from '@/app/components/ui/TableSkeletonRow';
 import { useLookups } from '@/app/hooks/useLookups';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 
+const DEFAULTS: { [key: string]: string | number } = {
+  page: 0,
+  limit: 5,
+  sortBy: 'created_at',
+  sortDirection: 'DESC',
+  // ...các filter mặc định khác nếu có
+};
+
+function getParam(searchParams: URLSearchParams, key: string, defaultValue: any) {
+  const value = searchParams.get(key);
+  if (value === null) return defaultValue;
+  if (key === 'page') return Math.max(Number(value) - 1, 0); // page trên URL bắt đầu từ 1
+  if (key === 'size') return Number(value);
+  return value;
+}
 export default function TaskListPage() {
+  const searchParams = useSearchParams();
+  const [filter, setFilter] = useState(() => ({
+    page: getParam(searchParams, 'page', DEFAULTS.page),
+    limit: getParam(searchParams, 'limit', DEFAULTS.limit),
+    sortBy: getParam(searchParams, 'sortBy', DEFAULTS.sortBy),
+    sortDirection: getParam(searchParams, 'sortDirection', DEFAULTS.sortDirection),
+    title: searchParams.get('title') || "",
+    taskStageId: searchParams.get('taskStageId') || undefined,
+    taskPriorityId: searchParams.get('taskPriorityId') || undefined,
+    labelId: searchParams.get('labelId') || undefined,
+    description: searchParams.get('description') || undefined,
+    projectId: searchParams.get('projectId') || undefined,
+    startDateFrom: searchParams.get('startDateFrom') || undefined,
+    startDateTo: searchParams.get('startDateTo') || undefined,
+    deadlineFrom: searchParams.get('deadlineFrom') || undefined,
+    deadlineTo: searchParams.get('deadlineTo') || undefined,
+    assignedUserId: searchParams.get('assignedUserId') || undefined,
+    // ...các filter khác
+  }));
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    Object.entries(filter).forEach(([key, value]) => {
+      // Chỉ set nếu khác mặc định và có giá trị
+      const defaultValue = DEFAULTS[key];
+      let v = value;
+      if (key === 'page') v = Number(value) + 1; // page trên URL bắt đầu từ 1
+      if (
+        v !== undefined &&
+        v !== null &&
+        v !== '' &&
+        (defaultValue === undefined || String(v) !== String(defaultValue))
+      ) {
+        url.searchParams.set(key, String(v));
+      } else {
+        url.searchParams.delete(key);
+      }
+    });
+    window.history.replaceState(null, '', url.pathname + url.search);
+  }, [filter]);
+
   const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
   const [viewLoading, setViewLoading] = useState(false);
-  const { tasks, loading, error, filter, totalElements, updateFilter } = useTasks();
+  const { tasks, loading, error, totalElements } = useTasks(filter);
   const { prioritiesMap, statusesMap, labelsMap } = useLookups();
 
-  const handlePageChange = (page: number) => {
-    updateFilter({ page });
-  };
+
+  const handlePageChange = (page: number) => setFilter(f => ({ ...f, page }));
   const handleSort = (column: string) => {
-    if (filter.sortBy === column) {
-      updateFilter({
-        sortBy: column,
-        sortDirection: filter.sortDirection === 'ASC' ? 'DESC' : 'ASC',
-        page: 0,
-      });
-    } else {
-      updateFilter({
-        sortBy: column,
-        sortDirection: 'ASC',
-        page: 0,
-      });
-    }
+    setFilter(f => ({
+      ...f,
+      sortBy: column,
+      sortDirection: f.sortBy === column && f.sortDirection === 'ASC' ? 'DESC' : 'ASC',
+      page: 0,
+    }));
   };
-  const handlePageSizeChange = (size: number) => {
-    updateFilter({ limit: size, page: 0, sortBy: 'created_at', sortDirection: 'DESC' });
-  };
+  const handlePageSizeChange = (size: number) => setFilter(f => ({
+    ...f,
+    limit: size,
+    page: 0,
+    sortBy: 'created_at',
+    sortDirection: 'DESC',
+  }));
+  const handleFilterChange = (newFilter: Partial<typeof filter>) => setFilter(f => ({
+    ...f,
+    ...newFilter,
+    page: 0,
+  }));
   const handleSwitchView = () => {
     setViewLoading(true);
     setTimeout(() => {
@@ -67,7 +124,7 @@ export default function TaskListPage() {
       </div>
 
       <TaskFilter filter={filter}
-        onFilterChange={updateFilter}
+        onFilterChange={handleFilterChange}
         prioritiesMap={prioritiesMap}
         statusesMap={statusesMap}
         labelsMap={labelsMap} />

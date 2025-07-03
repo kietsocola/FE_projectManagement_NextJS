@@ -61,7 +61,7 @@ export default function EditLabelPage() {
             });
             setLoading(false);
             toast.success("Updated label successfully!");
-            router.push('/labels');
+            router.push(`/labels`);
         } catch {
             toast.error("Updated label fail!");
         }
@@ -129,7 +129,9 @@ export default function EditLabelPage() {
                     </div>
                     <div className="flex gap-2">
                         <Button type="submit" disabled={loading}>Save</Button>
-                        <Button type="button" variant="ghost" onClick={() => router.push('/labels')} disabled={loading}>
+                        <Button type="button" variant="ghost" onClick={() => {
+                            router.push(`/labels`);
+                        }} disabled={loading}>
                             Cancel
                         </Button>
                     </div>
