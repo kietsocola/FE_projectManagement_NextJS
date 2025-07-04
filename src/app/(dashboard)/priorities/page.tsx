@@ -113,8 +113,8 @@ export default function PriorityManagerPage() {
     try {
       await apiClient.delete(`/priority/${id}`);
       fetchPriorities();
-    } catch {
-      toast.error("Fail to delete priority")
+    } catch (err: any) {
+      toast.error(err.response.data.message);
     }
   };
 
@@ -124,7 +124,7 @@ export default function PriorityManagerPage() {
         <h1 className="text-2xl font-bold mb-4">Priority Management</h1>
         <Button
           type="button"
-          className="mb-4"
+          className="mb-4 cursor-pointer"
           onClick={() => router.push('/priorities/create')}
         >
           + Create Priority

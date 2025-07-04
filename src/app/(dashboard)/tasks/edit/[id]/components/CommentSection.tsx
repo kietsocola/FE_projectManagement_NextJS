@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { MoreVertical, Reply, ChevronDown } from 'lucide-react';
+import { MoreVertical, Reply, ChevronDown, Edit, Trash2 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -151,7 +151,7 @@ export default function CommentSection({ taskId }: CommentSectionProps) {
               if (comment.id === replyingTo) {
                 return {
                   ...comment,
-                  childComments: [response.data.data, ...comment.childComments],
+                  childComments: [response.data.data, ...(comment.childComments ?? [])],
                   childCount: comment.childCount + 1,
                 };
               }
@@ -181,24 +181,28 @@ export default function CommentSection({ taskId }: CommentSectionProps) {
       setNewComment('');
       setReplyingTo(null);
       toast.success("Add comment successfully!", {
-          // description: "Your changes have been applied.",
-        })
-    } catch (err) {
+        // description: "Your changes have been applied.",
+      })
+    } catch (err: any) {
       console.error('Failed to add comment', err);
-      toast.success("Add comment fail!", {
-          // description: "Your changes have been applied.",
-        })
+      if (err.response?.status === 403) {
+        toast.error("You don't have permission to delete this comment.");
+      } else {
+        toast.error("Fail to delete comment!");
+      }
     }
   };
 
   const updateComment = async (commentId: string) => {
     try {
-      const response = await apiClient.patch<{ success: boolean; data: TaskCommentResponseDTO }>(
-        `/tasks/${taskId}/comments/${commentId}`,
+      const response = await apiClient.put<{ success: boolean; data: TaskCommentResponseDTO }>(
+        `/task-comment/${commentId}`,
         {
+          taskId: taskId,
           content: editContent,
         }
       );
+      toast.success("Updated comment successfully!");
 
       setComments(prev => {
         const updateCommentInTree = (comments: TaskCommentResponseDTO[]): TaskCommentResponseDTO[] => {
@@ -222,14 +226,21 @@ export default function CommentSection({ taskId }: CommentSectionProps) {
       });
 
       setEditingComment(null);
-    } catch (err) {
+    } catch (err: any) {
+      if (err.response?.status === 403) {
+        toast.error("You don't have permission to update this comment.");
+      } else {
+        toast.error("Failed to update comment!");
+      }
       console.error('Failed to update comment', err);
     }
   };
 
   const deleteComment = async (commentId: string) => {
     try {
-      await apiClient.delete(`/tasks/${taskId}/comments/${commentId}`);
+      await apiClient.delete(`/task-comment/${commentId}`);
+
+      toast.success("Deleted Comment!");
 
       setComments(prev => {
         const removeCommentFromTree = (comments: TaskCommentResponseDTO[]): TaskCommentResponseDTO[] => {
@@ -259,7 +270,12 @@ export default function CommentSection({ taskId }: CommentSectionProps) {
         ...prev,
         totalElements: prev.totalElements - 1,
       }));
-    } catch (err) {
+    } catch (err: any) {
+      if (err.response?.status === 403) {
+        toast.error("You don't have permission to delete this comment.");
+      } else {
+        toast.error("Fail to delete comment!");
+      }
       console.error('Failed to delete comment', err);
     }
   };
@@ -314,17 +330,17 @@ export default function CommentSection({ taskId }: CommentSectionProps) {
                         Reply
                       </DropdownMenuItem>
                     )}
-                    {/* <DropdownMenuItem onClick={() => startEdit(comment)}>
+                    <DropdownMenuItem onClick={() => startEdit(comment)}>
                       <Edit className="mr-2 h-4 w-4" />
                       Edit
-                    </DropdownMenuItem> */}
-                    {/* <DropdownMenuItem
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
                       className="text-red-500"
                       onClick={() => deleteComment(comment.id)}
                     >
                       <Trash2 className="mr-2 h-4 w-4" />
                       Delete
-                    </DropdownMenuItem> */}
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -406,13 +422,13 @@ export default function CommentSection({ taskId }: CommentSectionProps) {
               </div>
             )}
 
-            {comment.hasMoreChildren && ((comment.childCount - comment.childComments.length)!==0) && (
+            {comment.hasMoreChildren && ((comment.childCount - comment.childComments.length) !== 0) && (
               <div className="mt-2 ml-6">
                 <Button
                   type='button'
                   variant="ghost"
                   size="sm"
-                  className="text-blue-500"
+                  className="text-blue-500 cursor-pointer"
                   onClick={() => loadMoreReplies(comment.id)}
                 >
                   <ChevronDown className="h-4 w-4 mr-1" />
@@ -446,6 +462,7 @@ export default function CommentSection({ taskId }: CommentSectionProps) {
         {pagination.page < pagination.totalPages - 1 && (
           <div className="flex justify-center">
             <Button
+              className='cursor-pointer'
               type='button'
               variant="outline"
               onClick={loadMoreComments}
@@ -475,6 +492,7 @@ export default function CommentSection({ taskId }: CommentSectionProps) {
             />
             <div className="flex justify-end mt-2">
               <Button
+                className='cursor-pointer'
                 type="button"
                 onClick={addComment}
                 disabled={!newComment.trim()}

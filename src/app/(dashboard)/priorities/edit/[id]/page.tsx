@@ -105,7 +105,7 @@ export default function EditPriorityPage() {
                                 <button
                                     type="button"
                                     key={c}
-                                    className={`w-6 h-6 rounded-full border-2 ${color === c && !hex ? 'border-blue-500' : 'border-gray-300'}`}
+                                    className={`cursor-pointer w-6 h-6 rounded-full border-2 ${color === c && !hex ? 'border-blue-500' : 'border-gray-300'}`}
                                     style={{ background: c }}
                                     onClick={() => { setColor(c); setHex(''); }}
                                     disabled={loading}
@@ -142,8 +142,8 @@ export default function EditPriorityPage() {
                         />
                     </div> */}
                     <div className="flex gap-2">
-                        <Button type="submit" disabled={loading}>Save</Button>
-                        <Button type="button" variant="ghost" onClick={() => router.push('/priorities')} disabled={loading}>
+                        <Button className='cursor-pointer' type="submit" disabled={loading}>Save</Button>
+                        <Button className='cursor-pointer' type="button" variant="ghost" onClick={() => router.push('/priorities')} disabled={loading}>
                             Cancel
                         </Button>
                     </div>

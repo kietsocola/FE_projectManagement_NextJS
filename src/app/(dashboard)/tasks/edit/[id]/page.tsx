@@ -86,8 +86,12 @@ export default function TaskEditPage() {
       await apiClient.put(`/task/${id}`, task);
       toast.success("Task updated successfully");
       reloadActivity();
-    } catch (err) {
-      toast.error("Failed to update task");
+    } catch (err: any) {
+      if (err.response?.status === 403) {
+        toast.error("You don't have permission to update this task.");
+      } else {
+        toast.error("Fail to delete comment!");
+      }
       console.error("Update task error:", err);
     }
 
@@ -151,7 +155,7 @@ export default function TaskEditPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Edit Task</h1>
-        <Button variant="outline" onClick={() => router.push('/tasks')}>
+        <Button className='cursor-pointer' variant="outline" onClick={() => router.push('/tasks')}>
           Back to List
         </Button>
       </div>
@@ -235,6 +239,7 @@ export default function TaskEditPage() {
 
             <div className="flex items-center space-x-2">
               <Switch
+                className='cursor-pointer'
                 id="public-toggle"
                 checked={task.isPublic || false}
                 onCheckedChange={(value) => setTask({ ...task, isPublic: value })}
@@ -255,7 +260,7 @@ export default function TaskEditPage() {
           {error && <div className="text-red-500 mb-4">{error}</div>}
 
           <div className="flex justify-end">
-            <Button type="submit">Save Changes</Button>
+            <Button className='cursor-pointer' type="submit">Save Changes</Button>
           </div>
         </div>
 

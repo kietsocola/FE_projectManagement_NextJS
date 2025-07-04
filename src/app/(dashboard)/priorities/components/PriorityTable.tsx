@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Priority } from '../page';
+import ConfirmDialog from '@/app/components/ui/ConfirmDialog';
 
 interface PriorityTableProps {
     priorities: Priority[];
@@ -53,6 +54,7 @@ function Pagination({
     return (
         <div className="flex gap-1 justify-center items-center mt-4">
             <Button
+                className='cursor-pointer'
                 type="button"
                 size="sm"
                 variant="outline"
@@ -70,7 +72,7 @@ function Pagination({
                         key={p}
                         size="sm"
                         variant={page === p ? 'default' : 'outline'}
-                        className="min-w-[32px] px-2"
+                        className="min-w-[32px] px-2 cursor-pointer"
                         onClick={() => onPageChange(Number(p))}
                     >
                         {Number(p) + 1}
@@ -78,6 +80,7 @@ function Pagination({
                 )
             )}
             <Button
+                className='cursor-pointer'
                 type="button"
                 size="sm"
                 variant="outline"
@@ -105,6 +108,7 @@ export default function PriorityTable({
     const router = useRouter();
     const [showSkeleton, setShowSkeleton] = useState(false);
     const loadingStart = useRef<number | null>(null);
+    const [priorityToDelete, setPriorityToDelete] = useState<string | null>(null);
 
     useEffect(() => {
         let timeout: NodeJS.Timeout;
@@ -174,6 +178,7 @@ export default function PriorityTable({
                                 <td className="px-6 py-4">
                                     <div className="flex gap-2 justify-center">
                                         <Button
+                                            className='cursor-pointer'
                                             type="button"
                                             size="sm"
                                             variant="outline"
@@ -182,10 +187,11 @@ export default function PriorityTable({
                                             Edit
                                         </Button>
                                         <Button
+                                            className='cursor-pointer'
                                             type="button"
                                             size="sm"
                                             variant="ghost"
-                                            onClick={() => onDelete(priority.id)}
+                                            onClick={() => setPriorityToDelete(priority.id)}
                                         >
                                             Delete
                                         </Button>
@@ -197,6 +203,18 @@ export default function PriorityTable({
                 </tbody>
             </table>
             <Pagination page={page} totalPages={totalPages} onPageChange={onPageChange} />
+            <ConfirmDialog
+                open={!!priorityToDelete}
+                onOpenChange={(open) => !open && setPriorityToDelete(null)}
+                title="Delete Priority"
+                description="Are you sure you want to delete this priority? This action cannot be undone."
+                onConfirm={async () => {
+                    if (priorityToDelete) {
+                        await onDelete(priorityToDelete);
+                        setPriorityToDelete(null);
+                    }
+                }}
+            />
         </div>
     );
 }

@@ -113,8 +113,12 @@ export default function StageSelect({ value, onChange }: StageSelectProps) {
             setNewHex('');
             setShowAdd(false);
             fetchStages();
-        } catch (err) {
-            toast.error("Fail when add stage! "+err)
+        } catch (err: any) {
+            if (err.response?.status === 403) {
+                toast.error("You don't have permission to add this stage.");
+            } else {
+                toast.error("Fail to delete comment!");
+            }
         }
     };
 
@@ -135,8 +139,12 @@ export default function StageSelect({ value, onChange }: StageSelectProps) {
             setEditColor(COLOR_PALETTE[0]);
             setEditHex('');
             fetchStages();
-        } catch (err) {
-            toast.error("Fail when add stage! "+err)
+        } catch (err: any) {
+            if (err.response?.status === 403) {
+                toast.error("You don't have permission to edit this stage.");
+            } else {
+                toast.error("Fail to delete comment!");
+            }
         }
     };
 

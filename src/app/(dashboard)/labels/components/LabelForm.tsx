@@ -66,7 +66,7 @@ export default function LabelForm({ label, onSave, onCancel }: LabelFormProps) {
             <button
               type="button"
               key={c}
-              className={`w-6 h-6 rounded-full border-2 ${color === c && !hex ? 'border-blue-500' : 'border-gray-300'}`}
+              className={`cursor-pointer w-6 h-6 rounded-full border-2 ${color === c && !hex ? 'border-blue-500' : 'border-gray-300'}`}
               style={{ background: c }}
               onClick={() => { setColor(c); setHex(''); }}
             />
@@ -89,8 +89,8 @@ export default function LabelForm({ label, onSave, onCancel }: LabelFormProps) {
         className="w-64"
       />
       <div className="flex gap-2">
-        <Button type="submit" size="sm">{label?.id ? 'Update' : 'Create'}</Button>
-        <Button type="button" size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
+        <Button className='cursor-pointer' type="submit" size="sm">{label?.id ? 'Update' : 'Create'}</Button>
+        <Button className='cursor-pointer' type="button" size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
       </div>
     </form>
   );

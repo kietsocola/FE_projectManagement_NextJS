@@ -126,8 +126,10 @@ export default function SubtaskList({ taskId, stageId }: SubtaskListProps) {
         err?.response?.data?.message?.includes('Maximum subtask depth')
       ) {
         toast.error('Subtask depth limit reached, cannot create!');
+      } else if (err.response?.status === 403) {
+        toast.error("You don't have permission to add this subtask.");
       } else {
-        toast.error('Failed to add subtask');
+        toast.error("Fail to delete comment!");
       }
     }
   };
@@ -179,7 +181,7 @@ export default function SubtaskList({ taskId, stageId }: SubtaskListProps) {
           placeholder="Add new subtask"
           onKeyDown={(e) => e.key === 'Enter' && addSubtask()}
         />
-        <Button onClick={addSubtask} type='button'>
+        <Button onClick={addSubtask} type='button' className='cursor-pointer'>
           <Plus className="h-4 w-4 mr-2" />
           Add
         </Button>

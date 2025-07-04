@@ -11,7 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { useProjectId } from '@/app/context/ProjectContext';
 
 
-export default function TaskForm({ onCreated }: { onCreated: (id: string) => void }) {
+export default function TaskForm({ onCreated, setCreating }: { onCreated: (id: string) => void, setCreating: (v: boolean) => void  }) {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [stageId, setStageId] = useState('');
@@ -32,6 +32,7 @@ export default function TaskForm({ onCreated }: { onCreated: (id: string) => voi
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
+        setCreating(true);
         try {
             const res = await apiClient.post('/task', {
                 title,
@@ -47,6 +48,7 @@ export default function TaskForm({ onCreated }: { onCreated: (id: string) => voi
             onCreated(res.data.data.id);
         } catch (err) {
             toast.error('Failed to create task: '+ err);
+            setCreating(false);
         } finally {
             setLoading(false);
         }
@@ -103,6 +105,7 @@ export default function TaskForm({ onCreated }: { onCreated: (id: string) => voi
                 </div>
                 <div className="flex items-center gap-2 mt-6">
                     <Switch
+                        className='cursor-pointer'
                         id="public-toggle"
                         checked={isPublic}
                         onCheckedChange={(value) => setIsPublic(value)}
@@ -117,7 +120,7 @@ export default function TaskForm({ onCreated }: { onCreated: (id: string) => voi
                 <Textarea value={description} onChange={e => setDescription(e.target.value)} rows={3} />
             </div>
             <div className="flex justify-end">
-                <Button type="submit" disabled={loading}>
+                <Button className='cursor-pointer' type="submit" disabled={loading}>
                     {loading ? 'Creating...' : 'Create Task'}
                 </Button>
             </div>

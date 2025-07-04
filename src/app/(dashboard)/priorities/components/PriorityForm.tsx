@@ -101,8 +101,8 @@ export default function PriorityForm({ priority, onSave, onCancel }: PriorityFor
                 min={1}
             />
             <div className="flex gap-2">
-                <Button type="submit" size="sm">{priority?.id ? 'Update' : 'Create'}</Button>
-                <Button type="button" size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
+                <Button className='cursor-pointer' type="submit" size="sm">{priority?.id ? 'Update' : 'Create'}</Button>
+                <Button className='cursor-pointer' type="button" size="sm" variant="ghost" onClick={onCancel}>Cancel</Button>
             </div>
         </form>
     );
