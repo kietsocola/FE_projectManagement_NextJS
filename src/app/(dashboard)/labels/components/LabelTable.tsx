@@ -4,6 +4,7 @@ import { Label } from '../page';
 import { Button } from '@/components/ui/button';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState, useRef } from 'react';
+import ConfirmDialog from '@/app/components/ui/ConfirmDialog';
 
 interface LabelTableProps {
     labels: Label[];
@@ -110,6 +111,7 @@ export default function LabelTable({
     const [showSkeleton, setShowSkeleton] = useState(false);
     const loadingStart = useRef<number | null>(null);
     const searchParams = useSearchParams();
+    const [labelToDelete, setLabelToDelete] = useState<string | null>(null);
 
 
     useEffect(() => {
@@ -190,7 +192,7 @@ export default function LabelTable({
                                                 type="button"
                                                 size="sm"
                                                 variant="ghost"
-                                                onClick={() => onDelete(label.id)}
+                                                onClick={() => setLabelToDelete(label.id)}
                                             >
                                                 Delete
                                             </Button>
@@ -203,6 +205,18 @@ export default function LabelTable({
                 </table>
             </div>
             <Pagination page={page} totalPages={totalPages} onPageChange={onPageChange} />
+            <ConfirmDialog
+                open={!!labelToDelete}
+                onOpenChange={(open) => !open && setLabelToDelete(null)}
+                title="Delete Label"
+                description="Are you sure you want to delete this label? This action cannot be undone."
+                onConfirm={async () => {
+                    if (labelToDelete) {
+                        await onDelete(labelToDelete);
+                        setLabelToDelete(null);
+                    }
+                }}
+            />
         </>
     );
 }

@@ -16,7 +16,7 @@ const NAV_ITEMS = [
 
 function Header({ onOpenSidebar }: { onOpenSidebar: () => void }) {
   return (
-    <header className="w-full bg-white border-b shadow-sm">
+    <header className="w-full bg-white border-b shadow-sm sticky top-0 z-999">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
         <span className="font-bold text-lg tracking-tight">BOOSTECH</span>
         {/* Hamburger chỉ hiện trên mobile */}

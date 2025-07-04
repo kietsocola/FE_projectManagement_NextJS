@@ -113,8 +113,8 @@ export default function PriorityManagerPage() {
     try {
       await apiClient.delete(`/priority/${id}`);
       fetchPriorities();
-    } catch {
-      toast.error("Fail to delete priority")
+    } catch (err: any) {
+      toast.error(err.response.data.message);
     }
   };
 

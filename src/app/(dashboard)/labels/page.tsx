@@ -144,8 +144,8 @@ export default function LabelManagerPage() {
     try {
       await apiClient.delete(`/label/${id}`);
       fetchLabels();
-    } catch {
-      toast.error("Fail to delete label")
+    } catch (err: any) {
+      toast.error(err.response.data.message);
     }
   };
 
