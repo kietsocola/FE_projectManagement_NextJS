@@ -56,7 +56,7 @@ export default function CreateLabelPage() {
                             <button
                                 type="button"
                                 key={c}
-                                className={`w-6 h-6 rounded-full border-2 ${color === c && !hex ? 'border-blue-500' : 'border-gray-300'}`}
+                                className={`cursor-pointer w-6 h-6 rounded-full border-2 ${color === c && !hex ? 'border-blue-500' : 'border-gray-300'}`}
                                 style={{ background: c }}
                                 onClick={() => { setColor(c); setHex(''); }}
                                 disabled={loading}
@@ -83,8 +83,8 @@ export default function CreateLabelPage() {
                     />
                 </div>
                 <div className="flex gap-2">
-                    <Button type="submit" disabled={loading}>Create</Button>
-                    <Button type="button" variant="ghost" onClick={() => router.push('/labels')} disabled={loading}>
+                    <Button className='cursor-pointer' type="submit" disabled={loading}>Create</Button>
+                    <Button className='cursor-pointer' type="button" variant="ghost" onClick={() => router.push('/labels')} disabled={loading}>
                         Cancel
                     </Button>
                 </div>

@@ -155,7 +155,7 @@ export default function LabelManagerPage() {
         <h1 className="text-2xl font-bold mb-4">Label Management</h1>
         <Button
           type="button"
-          className="mb-4"
+          className="mb-4 cursor-pointer"
           onClick={() => router.push('/labels/create')}
         >
           + Create Label

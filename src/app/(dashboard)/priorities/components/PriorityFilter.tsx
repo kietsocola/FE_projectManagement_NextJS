@@ -41,7 +41,7 @@ export default function PriorityFilter({ filter, onFilterChange }: PriorityFilte
   };
 
   return (
-    <div className="flex gap-3 items-end bg-white rounded-lg shadow p-4">
+    <div className="flex flex-col gap-3 sm:flex-row sm:gap-3 sm:items-end bg-white p-4 rounded-lg shadow">
       <div>
         <label className="block text-xs font-medium text-gray-700 mb-1">Name</label>
         <Input value={name} onChange={e => setName(e.target.value)} placeholder="Priority name" />
@@ -58,8 +58,8 @@ export default function PriorityFilter({ filter, onFilterChange }: PriorityFilte
         <label className="block text-xs font-medium text-gray-700 mb-1">Created To</label>
         <Input type="date" value={createdTo} onChange={e => setCreatedTo(e.target.value)} />
       </div>
-      <Button type="button" size="sm" onClick={handleApply}>Filter</Button>
-      <Button type="button" size="sm" variant="ghost" onClick={handleReset}>Reset</Button>
+      <Button className='cursor-pointer' type="button" size="sm" onClick={handleApply}>Filter</Button>
+      <Button className='cursor-pointer' type="button" size="sm" variant="ghost" onClick={handleReset}>Reset</Button>
     </div>
   );
 }

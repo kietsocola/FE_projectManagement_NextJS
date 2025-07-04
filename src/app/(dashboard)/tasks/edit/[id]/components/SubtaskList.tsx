@@ -179,7 +179,7 @@ export default function SubtaskList({ taskId, stageId }: SubtaskListProps) {
           placeholder="Add new subtask"
           onKeyDown={(e) => e.key === 'Enter' && addSubtask()}
         />
-        <Button onClick={addSubtask} type='button'>
+        <Button onClick={addSubtask} type='button' className='cursor-pointer'>
           <Plus className="h-4 w-4 mr-2" />
           Add
         </Button>

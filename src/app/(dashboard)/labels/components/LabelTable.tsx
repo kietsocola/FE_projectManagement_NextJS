@@ -55,6 +55,7 @@ function Pagination({
     return (
         <div className="flex gap-1 justify-center items-center mt-4">
             <Button
+                className='cursor-pointer'
                 type="button"
                 size="sm"
                 variant="outline"
@@ -72,7 +73,7 @@ function Pagination({
                         key={p}
                         size="sm"
                         variant={page === p ? 'default' : 'outline'}
-                        className="min-w-[32px] px-2"
+                        className="min-w-[32px] px-2 cursor-pointer"
                         onClick={() => onPageChange(Number(p))}
                     >
                         {Number(p) + 1}
@@ -80,6 +81,7 @@ function Pagination({
                 )
             )}
             <Button
+                className='cursor-pointer'
                 type="button"
                 size="sm"
                 variant="outline"
@@ -124,79 +126,83 @@ export default function LabelTable({
     }, [loading]);
 
     return (
-        <div className="rounded-md border overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                    <tr>
-                        <th
-                            className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'
-                            onClick={() => onSortChange('name', direction === 'ASC' ? 'DESC' : 'ASC')}
-                        >
-                            Name {sortBy === 'name' ? (direction === 'ASC' ? '▲' : '▼') : ''}
-                        </th>
-                        <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Color</th>
-                        <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Description</th>
-                        <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Created At</th>
-                        <th className='px-9 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Actions</th>
-                    </tr>
-                </thead>
-                <tbody className='bg-white divide-y divide-gray-200'>
-                    {(showSkeleton || loading) ? (
-                        Array.from({ length: 5 }).map((_, idx) => (
-                            <tr key={idx} className="animate-pulse">
-                                <td className="px-6 py-4"><div className="h-4 w-12 bg-gray-200 rounded" /></td>
-                                <td className="px-6 py-4"><div className="h-4 w-12 bg-gray-100 rounded" /></td>
-                                <td className="px-6 py-4"><div className="h-4 w-32 bg-gray-100 rounded" /></td>
-                                <td className="px-6 py-4"><div className="h-4 w-24 bg-gray-100 rounded" /></td>
-                                <td className="px-6 py-4"><div className="h-8 w-20 bg-gray-100 rounded" /></td>
-                            </tr>
-                        ))
-                    ) : labels.length === 0 ? (
+        <>
+            <div className="rounded-md border overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
                         <tr>
-                            <td colSpan={5} className="text-center py-4">No labels found</td>
-                        </tr>
-                    ) : (
-                        labels.map(label => (
-                            <tr
-                                key={label.id}
-                                className="border-b last:border-b-0 hover:bg-gray-50 transition-colors"
+                            <th
+                                className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'
+                                onClick={() => onSortChange('name', direction === 'ASC' ? 'DESC' : 'ASC')}
                             >
-                                <td className="px-6 py-4">{label.name}</td>
-                                <td className="px-6 py-4">
-                                    <span className="inline-block w-5 h-5 rounded-full border align-middle" style={{ background: label.color }} />
-                                    <span className="ml-2 text-xs align-middle">{label.color}</span>
-                                </td>
-                                <td className="px-6 py-4">{label.description}</td>
-                                <td className="px-6 py-4">{label.createdAt ? new Date(label.createdAt).toLocaleString() : ''}</td>
-                                <td className="px-6 py-4">
-                                    <div className="flex gap-2 justify-center">
-                                        <Button
-                                            type="button"
-                                            size="sm"
-                                            variant="outline"
-                                            onClick={() => {
-                                                const query = searchParams.toString();
-                                                router.push(`/labels/edit/${label.id}${query ? `?${query}` : ''}`);
-                                            }}
-                                        >
-                                            Edit
-                                        </Button>
-                                        <Button
-                                            type="button"
-                                            size="sm"
-                                            variant="ghost"
-                                            onClick={() => onDelete(label.id)}
-                                        >
-                                            Delete
-                                        </Button>
-                                    </div>
-                                </td>
+                                Name {sortBy === 'name' ? (direction === 'ASC' ? '▲' : '▼') : ''}
+                            </th>
+                            <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Color</th>
+                            <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Description</th>
+                            <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Created At</th>
+                            <th className='px-9 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody className='bg-white divide-y divide-gray-200'>
+                        {(showSkeleton || loading) ? (
+                            Array.from({ length: 5 }).map((_, idx) => (
+                                <tr key={idx} className="animate-pulse">
+                                    <td className="px-6 py-4"><div className="h-4 w-12 bg-gray-200 rounded" /></td>
+                                    <td className="px-6 py-4"><div className="h-4 w-12 bg-gray-100 rounded" /></td>
+                                    <td className="px-6 py-4"><div className="h-4 w-32 bg-gray-100 rounded" /></td>
+                                    <td className="px-6 py-4"><div className="h-4 w-24 bg-gray-100 rounded" /></td>
+                                    <td className="px-6 py-4"><div className="h-8 w-20 bg-gray-100 rounded" /></td>
+                                </tr>
+                            ))
+                        ) : labels.length === 0 ? (
+                            <tr>
+                                <td colSpan={5} className="text-center py-4">No labels found</td>
                             </tr>
-                        ))
-                    )}
-                </tbody>
-            </table>
+                        ) : (
+                            labels.map(label => (
+                                <tr
+                                    key={label.id}
+                                    className="border-b last:border-b-0 hover:bg-gray-50 transition-colors"
+                                >
+                                    <td className="px-6 py-4">{label.name}</td>
+                                    <td className="px-6 py-4">
+                                        <span className="inline-block w-5 h-5 rounded-full border align-middle" style={{ background: label.color }} />
+                                        <span className="ml-2 text-xs align-middle">{label.color}</span>
+                                    </td>
+                                    <td className="px-6 py-4">{label.description}</td>
+                                    <td className="px-6 py-4">{label.createdAt ? new Date(label.createdAt).toLocaleString() : ''}</td>
+                                    <td className="px-6 py-4">
+                                        <div className="flex gap-2 justify-center">
+                                            <Button
+                                                className='cursor-pointer'
+                                                type="button"
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => {
+                                                    const query = searchParams.toString();
+                                                    router.push(`/labels/edit/${label.id}${query ? `?${query}` : ''}`);
+                                                }}
+                                            >
+                                                Edit
+                                            </Button>
+                                            <Button
+                                                className='cursor-pointer'
+                                                type="button"
+                                                size="sm"
+                                                variant="ghost"
+                                                onClick={() => onDelete(label.id)}
+                                            >
+                                                Delete
+                                            </Button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            </div>
             <Pagination page={page} totalPages={totalPages} onPageChange={onPageChange} />
-        </div>
+        </>
     );
 }

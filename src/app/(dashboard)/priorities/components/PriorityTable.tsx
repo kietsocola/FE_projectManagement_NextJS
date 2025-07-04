@@ -53,6 +53,7 @@ function Pagination({
     return (
         <div className="flex gap-1 justify-center items-center mt-4">
             <Button
+                className='cursor-pointer'
                 type="button"
                 size="sm"
                 variant="outline"
@@ -70,7 +71,7 @@ function Pagination({
                         key={p}
                         size="sm"
                         variant={page === p ? 'default' : 'outline'}
-                        className="min-w-[32px] px-2"
+                        className="min-w-[32px] px-2 cursor-pointer"
                         onClick={() => onPageChange(Number(p))}
                     >
                         {Number(p) + 1}
@@ -78,6 +79,7 @@ function Pagination({
                 )
             )}
             <Button
+                className='cursor-pointer'
                 type="button"
                 size="sm"
                 variant="outline"
@@ -174,6 +176,7 @@ export default function PriorityTable({
                                 <td className="px-6 py-4">
                                     <div className="flex gap-2 justify-center">
                                         <Button
+                                            className='cursor-pointer'
                                             type="button"
                                             size="sm"
                                             variant="outline"
@@ -182,6 +185,7 @@ export default function PriorityTable({
                                             Edit
                                         </Button>
                                         <Button
+                                            className='cursor-pointer'
                                             type="button"
                                             size="sm"
                                             variant="ghost"

@@ -85,7 +85,7 @@ export default function TaskFilter({ filter, onFilterChange, prioritiesMap, stat
         <label className="block text-sm font-medium text-gray-700 mb-1">Filter</label>
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="outline" className="flex items-center gap-2">
+            <Button variant="outline" className="flex items-center gap-2 cursor-pointer">
               <Filter className="w-4 h-4" />
               <span className="hidden md:inline">More Filters</span>
             </Button>
@@ -268,6 +268,7 @@ export default function TaskFilter({ filter, onFilterChange, prioritiesMap, stat
             {/* Reset & Apply */}
             <div className="sticky bottom-0 bg-white pt-2 pb-2 flex justify-end gap-2 z-10">
               <Button
+              className=' cursor-pointer'
                 variant="outline"
                 size="sm"
                 onClick={() =>
@@ -286,7 +287,7 @@ export default function TaskFilter({ filter, onFilterChange, prioritiesMap, stat
               >
                 Reset
               </Button>
-              <Button size="sm" onClick={() => {
+              <Button className=' cursor-pointer' size="sm" onClick={() => {
                 onFilterChange({ ...pendingFilter, page: 0 });
                 setPopoverOpen(false);
               }}>Apply</Button>

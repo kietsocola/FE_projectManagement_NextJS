@@ -151,7 +151,7 @@ export default function CommentSection({ taskId }: CommentSectionProps) {
               if (comment.id === replyingTo) {
                 return {
                   ...comment,
-                  childComments: [response.data.data, ...comment.childComments],
+                  childComments: [response.data.data, ...(comment.childComments ?? [])],
                   childCount: comment.childCount + 1,
                 };
               }
@@ -412,7 +412,7 @@ export default function CommentSection({ taskId }: CommentSectionProps) {
                   type='button'
                   variant="ghost"
                   size="sm"
-                  className="text-blue-500"
+                  className="text-blue-500 cursor-pointer"
                   onClick={() => loadMoreReplies(comment.id)}
                 >
                   <ChevronDown className="h-4 w-4 mr-1" />
@@ -446,6 +446,7 @@ export default function CommentSection({ taskId }: CommentSectionProps) {
         {pagination.page < pagination.totalPages - 1 && (
           <div className="flex justify-center">
             <Button
+              className='cursor-pointer'
               type='button'
               variant="outline"
               onClick={loadMoreComments}
@@ -475,6 +476,7 @@ export default function CommentSection({ taskId }: CommentSectionProps) {
             />
             <div className="flex justify-end mt-2">
               <Button
+              className='cursor-pointer'
                 type="button"
                 onClick={addComment}
                 disabled={!newComment.trim()}

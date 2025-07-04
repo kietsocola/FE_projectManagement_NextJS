@@ -10,9 +10,10 @@ import TableSkeletonRow from '@/app/components/ui/TableSkeletonRow';
 import { useLookups } from '@/app/hooks/useLookups';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 const DEFAULTS: { [key: string]: string | number } = {
-  page: 0,
+  page: 1,
   limit: 5,
   sortBy: 'created_at',
   sortDirection: 'DESC',
@@ -29,7 +30,7 @@ function getParam(searchParams: URLSearchParams, key: string, defaultValue: any)
 export default function TaskListPage() {
   const searchParams = useSearchParams();
   const [filter, setFilter] = useState(() => ({
-    page: getParam(searchParams, 'page', DEFAULTS.page),
+    page: getParam(searchParams, 'page', 0),
     limit: getParam(searchParams, 'limit', DEFAULTS.limit),
     sortBy: getParam(searchParams, 'sortBy', DEFAULTS.sortBy),
     sortDirection: getParam(searchParams, 'sortDirection', DEFAULTS.sortDirection),
@@ -70,7 +71,7 @@ export default function TaskListPage() {
 
   const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
   const [viewLoading, setViewLoading] = useState(false);
-  const { tasks, loading, error, totalElements } = useTasks(filter);
+  const { tasks, loading, error, totalElements, deleteTask } = useTasks(filter);
   const { prioritiesMap, statusesMap, labelsMap } = useLookups();
 
 
@@ -112,7 +113,7 @@ export default function TaskListPage() {
           <Button
             type="button"
             onClick={() => router.push('/tasks/create')}
-            className="whitespace-nowrap"
+            className="whitespace-nowrap cursor-pointer"
           >
             + Create Task
           </Button>
@@ -156,6 +157,14 @@ export default function TaskListPage() {
           onPageSizeChange={handlePageSizeChange}
           prioritiesMap={prioritiesMap}
           statusesMap={statusesMap}
+          onDeleteTask={async (id: string) => {
+            try {
+              await deleteTask(id);
+              toast.success("Delete task successfully!");
+            } catch (err) {
+              toast.error("Delete task failed!");
+            }
+          }}
         />
       ) : (
         <TaskKanban />

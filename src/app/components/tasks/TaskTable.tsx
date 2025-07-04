@@ -25,6 +25,7 @@ interface TaskTableProps {
   onPageSizeChange?: (size: number) => void;
   prioritiesMap: any;
   statusesMap: any;
+  onDeleteTask: (id: string) => Promise<void>;
 }
 
 
@@ -41,7 +42,7 @@ function EmptyTask() {
   );
 }
 
-export default function TaskTable({ tasks, loading, page, limit, totalElements, onPageChange, sortBy, sortDirection, onSort, onPageSizeChange, prioritiesMap, statusesMap }: TaskTableProps) {
+export default function TaskTable({ tasks, loading, page, limit, totalElements, onPageChange, sortBy, sortDirection, onSort, onPageSizeChange, prioritiesMap, statusesMap, onDeleteTask }: TaskTableProps) {
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
 
   const columns: ColumnDef<TaskResponseDTO>[] = [
@@ -314,7 +315,7 @@ export default function TaskTable({ tasks, loading, page, limit, totalElements, 
         description="Are you sure you want to delete this task? This action cannot be undone."
         onConfirm={async () => {
           if (taskToDelete) {
-            // await deleteTask(taskToDelete);
+            await onDeleteTask(taskToDelete);
             setTaskToDelete(null);
           }
         }}
