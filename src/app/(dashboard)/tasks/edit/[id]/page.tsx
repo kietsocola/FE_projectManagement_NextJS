@@ -86,8 +86,12 @@ export default function TaskEditPage() {
       await apiClient.put(`/task/${id}`, task);
       toast.success("Task updated successfully");
       reloadActivity();
-    } catch (err) {
-      toast.error("Failed to update task");
+    } catch (err: any) {
+      if (err.response?.status === 403) {
+        toast.error("You don't have permission to update this task.");
+      } else {
+        toast.error("Fail to delete comment!");
+      }
       console.error("Update task error:", err);
     }
 

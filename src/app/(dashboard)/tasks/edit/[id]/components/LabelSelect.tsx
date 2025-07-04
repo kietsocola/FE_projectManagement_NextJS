@@ -46,8 +46,12 @@ export default function LabelSelect({ taskId, onReload }: LabelSelectProps) {
       await fetchAll();
       toast.success('Added label');
       if (onReload) onReload();
-    } catch (err) {
-      toast.error('Failed to add label '+err);
+    } catch (err: any) {
+      if (err.response?.status === 403) {
+        toast.error("You don't have permission to add this label.");
+      } else {
+        toast.error("Fail to delete comment!");
+      }
     }
   };
 
@@ -57,8 +61,12 @@ export default function LabelSelect({ taskId, onReload }: LabelSelectProps) {
       await fetchAll();
       toast.success('Removed label');
       if (onReload) onReload();
-    } catch (err) {
-      toast.error('Failed to remove label '+err);
+    } catch (err: any) {
+      if (err.response?.status === 403) {
+        toast.error("You don't have permission to delete this label.");
+      } else {
+        toast.error("Fail to delete comment!");
+      }
     }
   };
 

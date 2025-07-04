@@ -55,8 +55,12 @@ export default function AssigneeSelect({ taskId, onReload }: AssigneeSelectProps
       await fetchAll();
       toast.success('Added assignee');
       if (onReload) onReload();
-    } catch (err) {
-      toast.error('Failed to add assignee '+err);
+    } catch (err: any) {
+      if (err.response?.status === 403) {
+        toast.error("You don't have permission to add this assignee.");
+      } else {
+        toast.error("Fail to delete comment!");
+      }
     }
   };
 
@@ -67,8 +71,12 @@ export default function AssigneeSelect({ taskId, onReload }: AssigneeSelectProps
       await fetchAll();
       toast.success('Removed assignee');
       if (onReload) onReload();
-    } catch (err) {
-      toast.error('Failed to remove assignee '+err);
+    } catch (err: any) {
+      if (err.response?.status === 403) {
+        toast.error("You don't have permission to delete this assignee.");
+      } else {
+        toast.error("Fail to delete comment!");
+      }
     }
   };
 
