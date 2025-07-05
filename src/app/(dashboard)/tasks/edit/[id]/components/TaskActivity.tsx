@@ -1,7 +1,7 @@
 'use client';
 
 import { format } from 'date-fns';
-import { ActivityLogDTO } from '@/app/lib/types';
+import { ActivityLogDTO, LabelResponseDTO, TaskPriorityResponseDTO, TaskStageResponseDTO } from '@/app/lib/types';
 import { useState, useEffect, useCallback } from 'react';
 import apiClient from '@/app/lib/api';
 import { useProjectId } from '@/app/context/ProjectContext';
@@ -26,11 +26,11 @@ export default function TaskActivity({ taskId }: TaskActivityProps) {
   const [showSkeleton, setShowSkeleton] = useState(false);
   const users = useUsers();
 
-  function getUserName(id: string) {
+  const getUserName = useCallback((id: string) => {
     return users.find(u => u.id === id)?.name || id;
-  }
+  }, [users]);
 
-  const fetchActivities = async (nextPage = 0) => {
+  const fetchActivities = useCallback(async (nextPage = 0) => {
     setLoading(true);
     try {
       const res = await apiClient.get(`/task-log-activity/task/${taskId}?page=${nextPage}&size=${size}`);
@@ -46,12 +46,12 @@ export default function TaskActivity({ taskId }: TaskActivityProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [taskId, size]);
 
   useEffect(() => {
     setPage(0);
     fetchActivities(0);
-  }, [taskId]);
+  }, [fetchActivities]);
 
   const handleLoadMore = () => {
     setShowSkeleton(true);
@@ -72,22 +72,22 @@ export default function TaskActivity({ taskId }: TaskActivityProps) {
           apiClient.get(`/task-stage/by-project/${projectId}`),
         ]);
         const labelObj: Record<string, string> = {};
-        labelRes.data.forEach((item: any) => { labelObj[item.id] = item.name; });
+        labelRes.data.forEach((item: LabelResponseDTO) => { labelObj[item.id] = item.name; });
         setLabelMap(labelObj);
 
         const priorityObj: Record<string, string> = {};
-        priorityRes.data.forEach((item: any) => { priorityObj[item.id] = item.name; });
+        priorityRes.data.forEach((item: TaskPriorityResponseDTO) => { priorityObj[item.id] = item.name; });
         setPriorityMap(priorityObj);
 
         const stageObj: Record<string, string> = {};
-        stageRes.data.forEach((item: any) => { stageObj[item.id] = item.name; });
+        stageRes.data.forEach((item: TaskStageResponseDTO) => { stageObj[item.id] = item.name; });
         setStageMap(stageObj);
       } catch (err) {
         console.error(err);
       }
     };
     fetchMaps();
-  }, []);
+  }, [projectId]);
 
   // Helper để hiển thị tên thay vì uuid
   const getDisplayValue = useCallback((key: string, value: string) => {
@@ -101,7 +101,7 @@ export default function TaskActivity({ taskId }: TaskActivityProps) {
       return getUserName(value)
     };
     return value;
-  }, [labelMap, priorityMap, stageMap]);
+  }, [labelMap, priorityMap, stageMap, getUserName]);
 
   // Hàm build chi tiết thay đổi
   const buildActionDetails = useCallback((activity: ActivityLogDTO): string => {

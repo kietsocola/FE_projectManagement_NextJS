@@ -38,7 +38,7 @@ export default function TaskFilter({ filter, onFilterChange, prioritiesMap, stat
     }, 400); // 400ms debounce
 
     return () => clearTimeout(handler);
-  }, [titleInput]);
+  }, [titleInput, filter.title, onFilterChange]);
 
   useEffect(() => {
     setTitleInput(filter.title || '');

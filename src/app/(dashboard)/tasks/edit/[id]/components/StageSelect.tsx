@@ -8,6 +8,7 @@ import { Pencil, Plus } from 'lucide-react';
 import apiClient from '@/app/lib/api';
 import { useProjectId } from '@/app/context/ProjectContext';
 import { toast } from 'sonner';
+import { AxiosError } from 'axios';
 
 // Simple Modal
 function Modal({ open, onClose, children }: { open: boolean; onClose: () => void; children: React.ReactNode }) {
@@ -113,8 +114,9 @@ export default function StageSelect({ value, onChange }: StageSelectProps) {
             setNewHex('');
             setShowAdd(false);
             fetchStages();
-        } catch (err: any) {
-            if (err.response?.status === 403) {
+        } catch (err) {
+            const error = err as AxiosError<{ message: string }>;
+            if (error.response?.status === 403) {
                 toast.error("You don't have permission to add this stage.");
             } else {
                 toast.error("Fail to delete comment!");
@@ -139,8 +141,9 @@ export default function StageSelect({ value, onChange }: StageSelectProps) {
             setEditColor(COLOR_PALETTE[0]);
             setEditHex('');
             fetchStages();
-        } catch (err: any) {
-            if (err.response?.status === 403) {
+        } catch (err) {
+            const error = err as AxiosError<{ message: string }>;
+            if (error.response?.status === 403) {
                 toast.error("You don't have permission to edit this stage.");
             } else {
                 toast.error("Fail to delete comment!");
@@ -175,38 +178,47 @@ export default function StageSelect({ value, onChange }: StageSelectProps) {
                     <SelectValue placeholder="Choose stage..." />
                 </SelectTrigger>
                 <SelectContent>
-                    {sortedStages.map(stage => (
-                        <SelectItem key={stage.id} value={stage.id}>
-                            <span className="flex items-center gap-2">
-                                <span
-                                    className="inline-block w-3 h-3 rounded-full border"
-                                    style={{ background: stage.color || '#e5e7eb' }}
-                                />
-                                {stage.name}
-                            </span>
-                        </SelectItem>
-                    ))}
-                    <div className="px-2 py-2 border-t mt-2 flex flex-col gap-2">
-                        <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            className="w-full"
-                            onClick={handleShowEdit}
-                            disabled={!value}
-                        >
-                            <Pencil className="w-4 h-4 mr-1" /> Edit stage
-                        </Button>
-                        <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            className="w-full"
-                            onClick={handleShowAdd}
-                        >
-                            <Plus className="w-4 h-4 mr-1" /> Add stage
-                        </Button>
-                    </div>
+                    {loading ? (
+                        <div className="px-4 py-6 flex justify-center items-center">
+                            <span className="text-gray-400 text-sm">Loading...</span>
+                            {/* Hoặc dùng spinner/skeleton tuỳ ý */}
+                        </div>
+                    ) : (
+                        <>
+                            {sortedStages.map(stage => (
+                                <SelectItem key={stage.id} value={stage.id}>
+                                    <span className="flex items-center gap-2">
+                                        <span
+                                            className="inline-block w-3 h-3 rounded-full border"
+                                            style={{ background: stage.color || '#e5e7eb' }}
+                                        />
+                                        {stage.name}
+                                    </span>
+                                </SelectItem>
+                            ))}
+                            <div className="px-2 py-2 border-t mt-2 flex flex-col gap-2">
+                                <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    className="w-full"
+                                    onClick={handleShowEdit}
+                                    disabled={!value}
+                                >
+                                    <Pencil className="w-4 h-4 mr-1" /> Edit stage
+                                </Button>
+                                <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    className="w-full"
+                                    onClick={handleShowAdd}
+                                >
+                                    <Plus className="w-4 h-4 mr-1" /> Add stage
+                                </Button>
+                            </div>
+                        </>
+                    )}
                 </SelectContent>
             </Select>
 

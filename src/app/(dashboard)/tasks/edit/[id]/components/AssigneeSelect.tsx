@@ -1,6 +1,6 @@
 
-import { useState, useEffect } from 'react';
-import { UserDTO } from '@/app/lib/types';
+import { useState, useEffect, useCallback } from 'react';
+import { UserDTO, TaskAssign} from '@/app/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
@@ -10,6 +10,7 @@ import apiClient from '@/app/lib/api';
 import { toast } from 'sonner';
 import { useProjectId } from '@/app/context/ProjectContext';
 import { useUsers } from '@/app/context/UserContext';
+import { AxiosError } from 'axios';
 
 
 interface AssigneeSelectProps {
@@ -27,26 +28,26 @@ export default function AssigneeSelect({ taskId, onReload }: AssigneeSelectProps
   const usersMock = useUsers();
 
   // Fetch all users and assigned users
-  const fetchAll = async () => {
+  const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
       const usersRes = await apiClient.get<UserDTO[]>(`/projects/${projectId}/users`);
       setUsers(usersRes.data.length ? usersRes.data : usersMock);
-      const assignedRes = await apiClient.get<string[]>(`/task-assign?idTask=${taskId}`);
-      setAssignedUsers(assignedRes.data.map((u: any) => u.userId));
+      const assignedRes = await apiClient.get<TaskAssign[]>(`/task-assign?idTask=${taskId}`);
+      setAssignedUsers(assignedRes.data.map((u: TaskAssign) => u.userId));
     } catch (err) {
       toast.error('Failed to fetch users ' + err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [projectId, taskId, usersMock]);
 
   useEffect(() => {
     setShowLoading(true);
     const timer = setTimeout(() => setShowLoading(false), 600);
     fetchAll();
     return () => clearTimeout(timer);
-  }, [taskId]);
+  }, [fetchAll]);
 
   // Thêm user vào task
   const handleAdd = async (userId: string) => {
@@ -55,8 +56,9 @@ export default function AssigneeSelect({ taskId, onReload }: AssigneeSelectProps
       await fetchAll();
       toast.success('Added assignee');
       if (onReload) onReload();
-    } catch (err: any) {
-      if (err.response?.status === 403) {
+    } catch (err) {
+      const error = err as AxiosError<{ message: string }>;
+      if (error.response?.status === 403) {
         toast.error("You don't have permission to add this assignee.");
       } else {
         toast.error("Fail to delete comment!");
@@ -71,8 +73,9 @@ export default function AssigneeSelect({ taskId, onReload }: AssigneeSelectProps
       await fetchAll();
       toast.success('Removed assignee');
       if (onReload) onReload();
-    } catch (err: any) {
-      if (err.response?.status === 403) {
+    } catch (err) {
+      const error = err as AxiosError<{ message: string }>;
+      if (error.response?.status === 403) {
         toast.error("You don't have permission to delete this assignee.");
       } else {
         toast.error("Fail to delete comment!");

@@ -98,8 +98,8 @@ export interface ActivityLogDTO {
   id: string,
   taskId: string;
   userId: string;
-  oldValue?: Record<string, any>;
-  newValue: Record<string, any>;
+  oldValue?: Record<string, string>;
+  newValue: Record<string, string>;
   timestamp: string;
   userName: string;
 }
@@ -111,3 +111,19 @@ export interface SubtaskDTO {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface TaskAssign {
+    id: string;
+    createdAt: string;
+    createdBy: string;
+    updatedAt: string;
+    isActive: string;
+    deletedAt: string;
+    deletedBy: string;
+    taskId: string;
+    userId: string;
+    status: string;
+}
+
+export type PriorityMap = Record<string, TaskPriorityResponseDTO>;
+export type StatusesMap = Record<string, TaskStageResponseDTO>;

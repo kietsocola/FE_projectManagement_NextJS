@@ -7,6 +7,8 @@ import { UserContext, MOCK_USERS } from '@/app/context/UserContext';
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Menu } from "lucide-react"; // hoặc bất kỳ icon nào bạn thích
+import { Suspense } from 'react';
+import LoadingPage from "../components/ui/LoadingPage";
 
 const NAV_ITEMS = [
   { href: "/tasks", label: "Tasks" },
@@ -97,7 +99,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <Header onOpenSidebar={() => setSidebarOpen(true)} />
           <div className="flex flex-1 min-h-0 bg-gray-100">
             <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-            <main className="flex-1 px-4 sm:px-8 py-8 pt-0 overflow-x-auto">{children}</main>
+            <Suspense fallback={<LoadingPage/>}>
+              <main className="flex-1 px-4 sm:px-8 py-8 pt-0 overflow-x-auto">{children}</main>
+            </Suspense>
           </div>
           <Footer />
         </div>

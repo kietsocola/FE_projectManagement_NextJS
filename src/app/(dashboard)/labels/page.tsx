@@ -8,6 +8,7 @@ import apiClient from '@/app/lib/api';
 import { Button } from '@/components/ui/button';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
+import { AxiosError } from 'axios';
 
 export interface Label {
   id: string;
@@ -32,6 +33,13 @@ export interface LabelPagination {
   totalElements: number;
 }
 
+type UrlParams = {
+  page?: number;
+  size?: number;
+  sortBy?: string;
+  direction?: 'ASC' | 'DESC';
+} & Partial<LabelFilterDTO>;
+
 export default function LabelManagerPage() {
 
 
@@ -39,7 +47,7 @@ export default function LabelManagerPage() {
   const searchParams = useSearchParams();
 
   // 1. Lấy giá trị từ URL query
-  const getParam = (key: string, defaultValue: any) => {
+  const getParam = (key: string, defaultValue: string | number) => {
     const value = searchParams.get(key);
     if (value === null) return defaultValue;
     if (key === 'page') return Math.max(Number(value) - 1, 0); // page trên URL bắt đầu từ 1
@@ -54,12 +62,14 @@ export default function LabelManagerPage() {
     createdFrom: searchParams.get('createdFrom') || undefined,
     createdTo: searchParams.get('createdTo') || undefined,
   });
-  const [page, setPage] = useState(getParam('page', 0));
-  const [size] = useState(getParam('size', 5));
+  const [page, setPage] = useState<number>(Number(getParam('page', 0)));
+  const [size] = useState<number>(Number(getParam('size', 5)));
 
   const [totalPages, setTotalPages] = useState(1);
-  const [sortBy, setSortBy] = useState(getParam('sortBy', 'id'));
-  const [direction, setDirection] = useState<'ASC' | 'DESC'>(getParam('direction', 'ASC'));
+  const [sortBy, setSortBy] = useState<string>(String(getParam('sortBy', 'id')));
+  const rawDirection = getParam('direction', 'ASC');
+  const safeDirection = rawDirection === 'DESC' ? 'DESC' : 'ASC';
+  const [direction, setDirection] = useState<'ASC' | 'DESC'>(safeDirection);
   const [loading, setLoading] = useState(false);
   const [editingLabel, setEditingLabel] = useState<Label | null>(null);
 
@@ -71,7 +81,7 @@ export default function LabelManagerPage() {
   };
 
 
-  const updateUrl = (params: any) => {
+  const updateUrl = (params: UrlParams) => {
     const url = new URL(window.location.href);
     Object.entries(params).forEach(([key, value]) => {
       let v = value;
@@ -135,8 +145,9 @@ export default function LabelManagerPage() {
       }
       setEditingLabel(null);
       fetchLabels();
-    } catch {
-      toast.error("Fail to handle save label")
+    } catch (err) {
+      const error = err as AxiosError<{ message: string }>;
+      toast.error(error.response?.data?.message ?? 'Unknown error');
     }
   };
 
@@ -144,8 +155,9 @@ export default function LabelManagerPage() {
     try {
       await apiClient.delete(`/label/${id}`);
       fetchLabels();
-    } catch (err: any) {
-      toast.error(err.response.data.message);
+    } catch (err) {
+      const error = err as AxiosError<{ message: string }>;
+      toast.error(error.response?.data?.message ?? 'Unknown error');
     }
   };
 

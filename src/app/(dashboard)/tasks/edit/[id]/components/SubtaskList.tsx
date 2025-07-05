@@ -9,8 +9,8 @@ import apiClient from '@/app/lib/api';
 import { TaskResponseDTO } from '@/app/lib/types';
 import { useRouter } from 'next/navigation';
 import { useProjectId } from '@/app/context/ProjectContext';
-import { useUsers } from '@/app/context/UserContext';
 import { toast } from 'sonner';
+import { AxiosError } from 'axios';
 
 interface SubtaskListProps {
   taskId: string;
@@ -78,7 +78,7 @@ export default function SubtaskList({ taskId, stageId }: SubtaskListProps) {
   const [loading, setLoading] = useState(false);
 
   const projectId = useProjectId();
-  const users = useUsers();
+  // const users = useUsers();
   const router = useRouter();
 
   const fetchSubtasks = async (nextPage = 0, append = false) => {
@@ -120,13 +120,14 @@ export default function SubtaskList({ taskId, stageId }: SubtaskListProps) {
       setNewSubtask('');
       setPage(0);
       fetchSubtasks(0, false);
-    } catch (err: any) {
+    } catch (err) {
+      const error = err as AxiosError<{ message: string }>;
       if (
-        err?.response?.status === 400 &&
-        err?.response?.data?.message?.includes('Maximum subtask depth')
+        error?.response?.status === 400 &&
+        error?.response?.data?.message?.includes('Maximum subtask depth')
       ) {
         toast.error('Subtask depth limit reached, cannot create!');
-      } else if (err.response?.status === 403) {
+      } else if (error.response?.status === 403) {
         toast.error("You don't have permission to add this subtask.");
       } else {
         toast.error("Fail to delete comment!");
@@ -164,12 +165,12 @@ export default function SubtaskList({ taskId, stageId }: SubtaskListProps) {
     fetchSubtasks(nextPage, true);
   };
 
-  const getAssigneeNames = (userIds: string[]) => {
-    return userIds
-      .map(uid => users.find(u => u.id === uid)?.name)
-      .filter(Boolean)
-      .join(', ');
-  };
+  // const getAssigneeNames = (userIds: string[]) => {
+  //   return userIds
+  //     .map(uid => users.find(u => u.id === uid)?.name)
+  //     .filter(Boolean)
+  //     .join(', ');
+  // };
 
   return (
     <div className="bg-white p-6 rounded-lg shadow">

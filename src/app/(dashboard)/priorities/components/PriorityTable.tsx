@@ -121,7 +121,7 @@ export default function PriorityTable({
             timeout = setTimeout(() => setShowSkeleton(false), remain);
         }
         return () => clearTimeout(timeout);
-    }, [loading]);
+    }, [loading, showSkeleton]);
 
     return (
         <div className="rounded-md border overflow-x-auto">

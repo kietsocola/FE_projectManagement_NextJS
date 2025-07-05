@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
-import { TaskResponseDTO, LabelResponseDTO } from '@/app/lib/types';
+import { TaskResponseDTO, LabelResponseDTO, StatusesMap, PriorityMap } from '@/app/lib/types';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal, ChevronUp, ChevronDown } from 'lucide-react';
@@ -23,8 +23,8 @@ interface TaskTableProps {
   sortDirection?: 'ASC' | 'DESC';
   onSort?: (sortBy: string) => void;
   onPageSizeChange?: (size: number) => void;
-  prioritiesMap: any;
-  statusesMap: any;
+  prioritiesMap: PriorityMap;
+  statusesMap: StatusesMap;
   onDeleteTask: (id: string) => Promise<void>;
 }
 

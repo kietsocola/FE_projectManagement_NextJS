@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -14,6 +14,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import apiClient from '@/app/lib/api';
 import { toast } from "sonner";
+import { AxiosError } from 'axios';
+
 interface TaskCommentResponseDTO {
   id: string;
   taskId: string;
@@ -62,12 +64,9 @@ export default function CommentSection({ taskId }: CommentSectionProps) {
   const [editContent, setEditContent] = useState('');
   const [replyPages, setReplyPages] = useState<{ [commentId: string]: number }>({});
 
-  // Fetch initial comments
-  useEffect(() => {
-    fetchComments();
-  }, [taskId]);
+  
 
-  const fetchComments = async (page: number = 0) => {
+  const fetchComments = useCallback(async (page: number = 0) => {
     try {
       setPagination(prev => ({ ...prev, loading: true }));
       const response = await apiClient.get<{ success: boolean; data: PaginatedComments }>(
@@ -91,7 +90,12 @@ export default function CommentSection({ taskId }: CommentSectionProps) {
       console.error('Failed to fetch comments', err);
       setPagination(prev => ({ ...prev, loading: false }));
     }
-  };
+  }, [taskId, pagination.limit]);
+
+  // Fetch initial comments
+  useEffect(() => {
+    fetchComments();
+  }, [fetchComments]);
 
   const fetchReplies = async (commentId: string, page: number = 0) => {
     try {
@@ -183,9 +187,9 @@ export default function CommentSection({ taskId }: CommentSectionProps) {
       toast.success("Add comment successfully!", {
         // description: "Your changes have been applied.",
       })
-    } catch (err: any) {
-      console.error('Failed to add comment', err);
-      if (err.response?.status === 403) {
+    } catch (err) {
+      const error = err as AxiosError<{ message: string }>;
+      if (error.response?.status === 403) {
         toast.error("You don't have permission to delete this comment.");
       } else {
         toast.error("Fail to delete comment!");
@@ -226,8 +230,9 @@ export default function CommentSection({ taskId }: CommentSectionProps) {
       });
 
       setEditingComment(null);
-    } catch (err: any) {
-      if (err.response?.status === 403) {
+    } catch (err) {
+      const error = err as AxiosError<{ message: string }>;
+      if (error.response?.status === 403) {
         toast.error("You don't have permission to update this comment.");
       } else {
         toast.error("Failed to update comment!");
@@ -270,8 +275,9 @@ export default function CommentSection({ taskId }: CommentSectionProps) {
         ...prev,
         totalElements: prev.totalElements - 1,
       }));
-    } catch (err: any) {
-      if (err.response?.status === 403) {
+    } catch (err) {
+      const error = err as AxiosError<{ message: string }>;
+      if (error.response?.status === 403) {
         toast.error("You don't have permission to delete this comment.");
       } else {
         toast.error("Fail to delete comment!");

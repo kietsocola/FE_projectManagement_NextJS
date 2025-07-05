@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import apiClient from '../lib/api';
 import { TaskResponseDTO, TaskFilterDTO, PaginatedResponse } from '../lib/types';
+import { AxiosError } from 'axios';
 
 export const useTasks = (filter: TaskFilterDTO) => {
   const [tasks, setTasks] = useState<TaskResponseDTO[]>([]);
@@ -23,13 +24,13 @@ export const useTasks = (filter: TaskFilterDTO) => {
       setTotalElements(response.data.totalElements);
 
       setError(null);
-    } catch (err: any) {
-      if (err.message === 'Network Error') {
+    } catch (err) {
+      const error = err as AxiosError<{ message: string }>;
+      if (error.message === 'Network Error') {
         setError('Cannot connect to server');
       } else {
-        setError(err.response?.data?.message || 'Failed to fetch tasks');
+        setError(error.response?.data?.message || 'Failed to fetch tasks');
       }
-      console.error(err);
   } finally {
     setLoading(false);
   }

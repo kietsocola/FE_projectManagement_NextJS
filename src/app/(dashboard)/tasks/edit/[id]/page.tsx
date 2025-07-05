@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import LabelSelect from './components/LabelSelect';
 import { useProjectId } from '@/app/context/ProjectContext';
 import StageSelect from './components/StageSelect';
+import { AxiosError } from 'axios';
 
 
 export default function TaskEditPage() {
@@ -28,7 +29,7 @@ export default function TaskEditPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showLoading, setShowLoading] = useState(true);
-  const [stages, setStages] = useState<{ id: string; name: string }[]>([]);
+  const [, setStages] = useState<{ id: string; name: string }[]>([]);
   const projectId = useProjectId();
   const [activityKey, setActivityKey] = useState(0);
 
@@ -68,14 +69,14 @@ export default function TaskEditPage() {
         const stagesRes = await apiClient.get(`/task-stage/by-project/${projectId}`);
         setStages(stagesRes.data); // Giả sử API trả về [{id, name}, ...]
       } catch (err) {
-        console.warn("Failed to fetch stages", err);
+        console.error("Failed to fetch stages", err);
       }
 
       setLoading(false);
     };
 
     fetchData();
-  }, [id]);
+  }, [id, projectId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,8 +87,9 @@ export default function TaskEditPage() {
       await apiClient.put(`/task/${id}`, task);
       toast.success("Task updated successfully");
       reloadActivity();
-    } catch (err: any) {
-      if (err.response?.status === 403) {
+    } catch (err) {
+      const error = err as AxiosError<{ message: string }>;
+      if (error.response?.status === 403) {
         toast.error("You don't have permission to update this task.");
       } else {
         toast.error("Fail to delete comment!");

@@ -125,7 +125,7 @@ export default function LabelTable({
             timeout = setTimeout(() => setShowSkeleton(false), remain);
         }
         return () => clearTimeout(timeout);
-    }, [loading]);
+    }, [loading, showSkeleton]);
 
     return (
         <>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { LabelResponseDTO } from '@/app/lib/types';
 import apiClient from '@/app/lib/api';
 import { Badge } from '@/components/ui/badge';
@@ -7,6 +7,7 @@ import { X, Tag } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { toast } from "sonner";
+import { AxiosError } from 'axios';
 
 interface LabelSelectProps {
   taskId: string;
@@ -20,25 +21,24 @@ export default function LabelSelect({ taskId, onReload }: LabelSelectProps) {
   const [loading, setLoading] = useState(true);
 
   // Fetch all labels and assigned labels
-  const fetchAll = async () => {
+  const fetchAll = useCallback(async () => {
     setLoading(true);
     try {
       const res = await apiClient.get<LabelResponseDTO[]>('/label');
       setAvailableLabels(res.data);
 
-      // Fetch labels assigned to this task
       const assignedRes = await apiClient.get<LabelResponseDTO[]>(`/task-label?idTask=${taskId}`);
       setSelectedLabels(assignedRes.data);
     } catch (err) {
-      toast.error('Failed to fetch labels '+err);
+      toast.error('Failed to fetch labels ' + err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [taskId]); // ✅ Bỏ `fetchAll` phụ thuộc `taskId`
 
   useEffect(() => {
     fetchAll();
-  }, [taskId]);
+  }, [fetchAll]); // ✅ Không còn warning
 
   const handleAdd = async (label: LabelResponseDTO) => {
     try {
@@ -46,8 +46,9 @@ export default function LabelSelect({ taskId, onReload }: LabelSelectProps) {
       await fetchAll();
       toast.success('Added label');
       if (onReload) onReload();
-    } catch (err: any) {
-      if (err.response?.status === 403) {
+    } catch (err) {
+      const error = err as AxiosError<{ message: string }>;
+      if (error.response?.status === 403) {
         toast.error("You don't have permission to add this label.");
       } else {
         toast.error("Fail to delete comment!");
@@ -61,8 +62,9 @@ export default function LabelSelect({ taskId, onReload }: LabelSelectProps) {
       await fetchAll();
       toast.success('Removed label');
       if (onReload) onReload();
-    } catch (err: any) {
-      if (err.response?.status === 403) {
+    } catch (err) {
+      const error = err as AxiosError<{ message: string }>;
+      if (error.response?.status === 403) {
         toast.error("You don't have permission to delete this label.");
       } else {
         toast.error("Fail to delete comment!");

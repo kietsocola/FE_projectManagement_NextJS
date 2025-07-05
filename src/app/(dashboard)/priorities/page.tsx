@@ -7,6 +7,7 @@ import apiClient from '@/app/lib/api';
 import { Button } from '@/components/ui/button';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
+import { AxiosError } from 'axios';
 
 export interface Priority {
   id: string;
@@ -23,13 +24,19 @@ export interface TaskPriorityFilterDTO {
   createdFrom?: string;
   createdTo?: string;
 }
+type UrlParams = {
+  page?: number;
+  size?: number;
+  sortBy?: string;
+  direction?: 'ASC' | 'DESC';
+} & Partial<TaskPriorityFilterDTO>;
 
 export default function PriorityManagerPage() {
 
 
   const searchParams = useSearchParams();
 
-  const getParam = (key: string, defaultValue: any) => {
+  const getParam = (key: string, defaultValue: string | number) => {
     const value = searchParams.get(key);
     if (value === null) return defaultValue;
     if (key === 'page' || key === 'size') return Number(value);
@@ -43,11 +50,13 @@ export default function PriorityManagerPage() {
     createdFrom: searchParams.get('createdFrom') || undefined,
     createdTo: searchParams.get('createdTo') || undefined,
   });
-  const [page, setPage] = useState(getParam('page', 0));
-  const [size] = useState(getParam('size', 5));
+  const [page, setPage] = useState<number>(Number(getParam('page', 0)));
+  const [size] = useState<number>(Number(getParam('size', 5)));
   const [totalPages, setTotalPages] = useState(1);
-  const [sortBy, setSortBy] = useState(getParam('sortBy', 'id'));
-  const [direction, setDirection] = useState<'ASC' | 'DESC'>(getParam('direction', 'ASC'));
+  const [sortBy, setSortBy] = useState<string>(String(getParam('sortBy', 'id')));
+  const rawDirection = getParam('direction', 'ASC');
+  const safeDirection = rawDirection === 'DESC' ? 'DESC' : 'ASC';
+  const [direction, setDirection] = useState<'ASC' | 'DESC'>(safeDirection);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -59,7 +68,7 @@ export default function PriorityManagerPage() {
   };
 
 
-  const updateUrl = (params: any) => {
+  const updateUrl = (params: UrlParams) => {
     const url = new URL(window.location.href);
     Object.entries(params).forEach(([key, value]) => {
       let v = value;
@@ -78,7 +87,7 @@ export default function PriorityManagerPage() {
     window.history.replaceState(null, '', url.pathname + url.search);
   };
 
-  
+
   useEffect(() => {
     updateUrl({
       page,
@@ -113,8 +122,9 @@ export default function PriorityManagerPage() {
     try {
       await apiClient.delete(`/priority/${id}`);
       fetchPriorities();
-    } catch (err: any) {
-      toast.error(err.response.data.message);
+    } catch (err) {
+      const error = err as AxiosError<{ message: string }>;
+      toast.error(error.response?.data?.message ?? 'Unknown error');
     }
   };
 

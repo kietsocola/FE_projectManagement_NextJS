@@ -20,20 +20,30 @@ const DEFAULTS: { [key: string]: string | number } = {
   // ...các filter mặc định khác nếu có
 };
 
-function getParam(searchParams: URLSearchParams, key: string, defaultValue: any) {
+function getParam(
+  searchParams: URLSearchParams,
+  key: string,
+  defaultValue: string | number
+): string | number {
   const value = searchParams.get(key);
   if (value === null) return defaultValue;
   if (key === 'page') return Math.max(Number(value) - 1, 0); // page trên URL bắt đầu từ 1
-  if (key === 'size') return Number(value);
+  if (key === 'size' || key === 'limit') return Number(value);
   return value;
 }
 export default function TaskListPage() {
   const searchParams = useSearchParams();
   const [filter, setFilter] = useState(() => ({
-    page: getParam(searchParams, 'page', 0),
-    limit: getParam(searchParams, 'limit', DEFAULTS.limit),
-    sortBy: getParam(searchParams, 'sortBy', DEFAULTS.sortBy),
-    sortDirection: getParam(searchParams, 'sortDirection', DEFAULTS.sortDirection),
+    page: Number(getParam(searchParams, 'page', 0)),
+    limit: Number(getParam(searchParams, 'limit', DEFAULTS.limit)),
+    sortBy: String(getParam(searchParams, 'sortBy', DEFAULTS.sortBy)),
+    sortDirection: ((): "ASC" | "DESC" | undefined => {
+      const dir = getParam(searchParams, 'sortDirection', DEFAULTS.sortDirection);
+      if (dir === "ASC" || dir === "DESC") return dir;
+      return DEFAULTS.sortDirection === "ASC" || DEFAULTS.sortDirection === "DESC"
+        ? DEFAULTS.sortDirection as "ASC" | "DESC"
+        : undefined;
+    })(),
     title: searchParams.get('title') || "",
     taskStageId: searchParams.get('taskStageId') || undefined,
     taskPriorityId: searchParams.get('taskPriorityId') || undefined,
@@ -152,7 +162,11 @@ export default function TaskListPage() {
           totalElements={totalElements}
           onPageChange={handlePageChange}
           sortBy={filter.sortBy}
-          sortDirection={filter.sortDirection}
+          sortDirection={
+            filter.sortDirection === 'ASC' || filter.sortDirection === 'DESC'
+              ? filter.sortDirection
+              : undefined
+          }
           onSort={handleSort}
           onPageSizeChange={handlePageSizeChange}
           prioritiesMap={prioritiesMap}
@@ -161,7 +175,7 @@ export default function TaskListPage() {
             try {
               await deleteTask(id);
               toast.success("Delete task successfully!");
-            } catch (err) {
+            } catch {
               toast.error("Delete task failed!");
             }
           }}

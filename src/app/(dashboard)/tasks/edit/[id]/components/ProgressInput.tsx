@@ -12,7 +12,7 @@ export default function ProgressInput({ value, onChange }: ProgressInputProps) {
     <div className="flex items-center gap-4">
       <Slider
         value={[value]}
-        onValueChange={(vals: any) => onChange(vals[0])}
+        onValueChange={(vals: number[]) => onChange(vals[0])}
         min={0}
         max={100}
         step={1}
