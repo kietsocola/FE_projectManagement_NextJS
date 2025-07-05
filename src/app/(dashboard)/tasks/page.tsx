@@ -11,6 +11,7 @@ import { useLookups } from '@/app/hooks/useLookups';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { useProjectId } from '@/app/context/ProjectContext';
 
 const DEFAULTS: { [key: string]: string | number } = {
   page: 1,
@@ -33,6 +34,7 @@ function getParam(
 }
 export default function TaskListPage() {
   const searchParams = useSearchParams();
+  const projectId = useProjectId();
   const [filter, setFilter] = useState(() => ({
     page: Number(getParam(searchParams, 'page', 0)),
     limit: Number(getParam(searchParams, 'limit', DEFAULTS.limit)),
@@ -49,7 +51,7 @@ export default function TaskListPage() {
     taskPriorityId: searchParams.get('taskPriorityId') || undefined,
     labelId: searchParams.get('labelId') || undefined,
     description: searchParams.get('description') || undefined,
-    projectId: searchParams.get('projectId') || undefined,
+    projectId: projectId,
     startDateFrom: searchParams.get('startDateFrom') || undefined,
     startDateTo: searchParams.get('startDateTo') || undefined,
     deadlineFrom: searchParams.get('deadlineFrom') || undefined,
@@ -61,6 +63,7 @@ export default function TaskListPage() {
   useEffect(() => {
     const url = new URL(window.location.href);
     Object.entries(filter).forEach(([key, value]) => {
+      if (key === 'projectId') return; // <-- Bỏ qua projectId
       // Chỉ set nếu khác mặc định và có giá trị
       const defaultValue = DEFAULTS[key];
       let v = value;
